@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenameFiles", "RenameFiles\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelToJson", "ExcelToJson\ExcelToJson.csproj", "{7997432E-67CE-43AB-8C28-72DE6949D511}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wordpress", "Wordpress\Wordpress.csproj", "{5C6A4C88-B8C1-4EC0-AA2E-C885537E5DBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{7997432E-67CE-43AB-8C28-72DE6949D511}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7997432E-67CE-43AB-8C28-72DE6949D511}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7997432E-67CE-43AB-8C28-72DE6949D511}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C6A4C88-B8C1-4EC0-AA2E-C885537E5DBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C6A4C88-B8C1-4EC0-AA2E-C885537E5DBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C6A4C88-B8C1-4EC0-AA2E-C885537E5DBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C6A4C88-B8C1-4EC0-AA2E-C885537E5DBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
