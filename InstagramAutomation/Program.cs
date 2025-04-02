@@ -5,6 +5,11 @@ string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
 string filePath = "C:\\Users\\abhis\\Desktop\\accounts.txt"; // Text file containing Instagram usernames
 
+//// Initialize WebDriver
+//ChromeOptions options = new ChromeOptions();
+//options.AddArgument("--start-maximized"); // Open browser in maximized mode
+
+
 // Initialize ChromeOptions for headless mode
 ChromeOptions options = new ChromeOptions();
 options.AddArgument("--headless"); // Run in headless mode (no GUI)
@@ -13,8 +18,6 @@ options.AddArgument("--window-size=1920,1080"); // Set window size
 options.AddArgument("--no-sandbox"); // Bypass OS security model
 options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
 options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
-
-options.AddArgument("--start-maximized"); // Open browser in maximized mode
 IWebDriver driver = new ChromeDriver(options);
 
 try
