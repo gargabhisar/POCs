@@ -5,10 +5,11 @@ string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
 string filePath = "C:\\Users\\abhis\\Desktop\\accounts.txt"; // Text file containing Instagram usernames
 
-//// Initialize WebDriver
+int count = 1;
+
+// Initialize WebDriver
 //ChromeOptions options = new ChromeOptions();
 //options.AddArgument("--start-maximized"); // Open browser in maximized mode
-
 
 // Initialize ChromeOptions for headless mode
 ChromeOptions options = new ChromeOptions();
@@ -18,6 +19,7 @@ options.AddArgument("--window-size=1920,1080"); // Set window size
 options.AddArgument("--no-sandbox"); // Bypass OS security model
 options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
 options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+
 IWebDriver driver = new ChromeDriver(options);
 
 try
@@ -37,6 +39,10 @@ try
 
     foreach (string account in accounts)
     {
+        if(count>100)
+        {
+            break; // Limit to 100 accounts
+        }
         BlockUser(driver, account);
     }
 }
@@ -72,7 +78,8 @@ void BlockUser(IWebDriver driver, string username)
         confirmButton.Click();
         Thread.Sleep(2000);
 
-        Console.WriteLine($"Blocked: {username}");
+        Console.WriteLine($"Blocked: {count}.{username}");
+        count++;
     }
     catch (Exception ex)
     {
