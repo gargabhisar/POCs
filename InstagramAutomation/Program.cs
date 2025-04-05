@@ -50,6 +50,7 @@ try
     {
         if (count > 100)
         {
+            Console.ReadLine();
             break; // Limit to 100 accounts
         }
         BlockUser(driver, account);
