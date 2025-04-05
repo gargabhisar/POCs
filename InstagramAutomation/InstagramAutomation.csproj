@@ -13,4 +13,8 @@
     <PackageReference Include="WebDriverManager" Version="2.17.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
+
 </Project>
