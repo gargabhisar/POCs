@@ -2,67 +2,125 @@
 using OpenQA.Selenium;
 using System.Text.Json;
 
-string username = "here_its_me_only";
-string password = "RainbowAbhisar@25";
-string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt"; // Text file containing Instagram usernames
-string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
-
 int count = 1;
+#region Block
+//string username = "here_its_me_only";
+//string password = "RainbowAbhisar@25";
+//string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt"; // Text file containing Instagram usernames
+//string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
+#endregion
 
-// Initialize WebDriver
-//ChromeOptions options = new ChromeOptions();
-//options.AddArgument("--start-maximized"); // Open browser in maximized mode
+#region Follow
+string username = "c_h_o_k_o_007";
+string password = "RainbowAbhisar@25";
+string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts_follow.txt"; // Text file containing Instagram usernames
+string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies_follow.json";
+#endregion
 
-// Initialize ChromeOptions for headless mode
-ChromeOptions options = new ChromeOptions();
-options.AddArgument("--headless"); // Run in headless mode (no GUI)
-options.AddArgument("--disable-gpu"); // Recommended for headless mode
-options.AddArgument("--window-size=1920,1080"); // Set window size
-options.AddArgument("--no-sandbox"); // Bypass OS security model
-options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
-options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+//BlockAccounts();
+FollowAccounts();
 
-IWebDriver driver = new ChromeDriver(options);
-
-try
+void FollowAccounts()
 {
-    // Navigate to Instagram login page
-    driver.Navigate().GoToUrl("https://www.instagram.com/accounts/login/");
-    Thread.Sleep(5000);
+    // Initialize WebDriver
+    ChromeOptions options = new ChromeOptions();
+    options.AddArgument("--start-maximized"); // Open browser in maximized mode
 
-    if (File.Exists(cookiesFile))
+    IWebDriver driver = new ChromeDriver(options);
+
+    try
     {
-        LoadCookies(driver, cookiesFile);
-        driver.Navigate().Refresh();
-        Thread.Sleep(3000);
-    }
+        // Navigate to Instagram login page
+        driver.Navigate().GoToUrl("https://www.instagram.com/accounts/login/");
+        Thread.Sleep(5000);
 
-    if (!IsLoggedIn(driver))
-    {
-        Login(driver);
-        SaveCookies(driver, cookiesFile);
-    }
-
-    // Read usernames from file
-    string[] accounts = File.ReadAllLines(filePath);
-
-    foreach (string account in accounts)
-    {
-        if (count > 100)
+        if (File.Exists(cookiesFile))
         {
-            Console.ReadLine();
-            break; // Limit to 100 accounts
+            LoadCookies(driver, cookiesFile);
+            driver.Navigate().Refresh();
+            Thread.Sleep(3000);
         }
-        BlockUser(driver, account);
+
+        if (!IsLoggedIn(driver))
+        {
+            Login(driver);
+            SaveCookies(driver, cookiesFile);
+        }
+
+        // Read usernames from file
+        string[] accounts = File.ReadAllLines(filePath);
+
+        foreach (string account in accounts)
+        {
+            FollowUser(driver, account);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error: " + ex.Message);
+    }
+    finally
+    {
+        driver.Quit();
     }
 }
-catch (Exception ex)
+
+void BlockAccounts()
 {
-    Console.WriteLine("Error: " + ex.Message);
-}
-finally
-{
-    driver.Quit();
+    // Initialize WebDriver
+    //ChromeOptions options = new ChromeOptions();
+    //options.AddArgument("--start-maximized"); // Open browser in maximized mode
+
+    // Initialize ChromeOptions for headless mode
+    ChromeOptions options = new ChromeOptions();
+    options.AddArgument("--headless"); // Run in headless mode (no GUI)
+    options.AddArgument("--disable-gpu"); // Recommended for headless mode
+    options.AddArgument("--window-size=1920,1080"); // Set window size
+    options.AddArgument("--no-sandbox"); // Bypass OS security model
+    options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
+    options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+
+    IWebDriver driver = new ChromeDriver(options);
+
+    try
+    {
+        // Navigate to Instagram login page
+        driver.Navigate().GoToUrl("https://www.instagram.com/accounts/login/");
+        Thread.Sleep(5000);
+
+        if (File.Exists(cookiesFile))
+        {
+            LoadCookies(driver, cookiesFile);
+            driver.Navigate().Refresh();
+            Thread.Sleep(3000);
+        }
+
+        if (!IsLoggedIn(driver))
+        {
+            Login(driver);
+            SaveCookies(driver, cookiesFile);
+        }
+
+        // Read usernames from file
+        string[] accounts = File.ReadAllLines(filePath);
+
+        foreach (string account in accounts)
+        {
+            //if (count > 100)
+            //{
+            //    break; // Limit to 100 accounts
+            //}
+            BlockUser(driver, account);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error: " + ex.Message);
+    }
+    finally
+    {
+        driver.Quit();
+    }
 }
 
 void Login(IWebDriver driver)
@@ -162,6 +220,31 @@ void BlockUser(IWebDriver driver, string username)
     catch (Exception ex)
     {
         Console.WriteLine($"Failed to block {username}: {ex.Message}");
+    }
+}
+
+void FollowUser(IWebDriver driver, string username)
+{
+    try
+    {
+        // Navigate to the user's profile
+        driver.Navigate().GoToUrl($"https://www.instagram.com/{username}/");
+        Thread.Sleep(5000);
+
+        var followButton = driver.FindElement(By.XPath("//button//div[text()='Follow']"));
+        followButton.Click();
+        Console.WriteLine($"Followed: {count}.{username}");
+        count++;
+
+        Thread.Sleep(3000);
+    }
+    catch (NoSuchElementException)
+    {
+        Console.WriteLine($"Already following or button not found: {username}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to follow {username}: {ex.Message}");
     }
 }
 
