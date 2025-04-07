@@ -23,8 +23,17 @@ FollowAccounts();
 void FollowAccounts()
 {
     // Initialize WebDriver
+    //ChromeOptions options = new ChromeOptions();
+    //options.AddArgument("--start-maximized"); // Open browser in maximized mode
+
+    // Initialize ChromeOptions for headless mode
     ChromeOptions options = new ChromeOptions();
-    options.AddArgument("--start-maximized"); // Open browser in maximized mode
+    options.AddArgument("--headless"); // Run in headless mode (no GUI)
+    options.AddArgument("--disable-gpu"); // Recommended for headless mode
+    options.AddArgument("--window-size=1920,1080"); // Set window size
+    options.AddArgument("--no-sandbox"); // Bypass OS security model
+    options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
+    options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
 
     IWebDriver driver = new ChromeDriver(options);
 
@@ -229,14 +238,14 @@ void FollowUser(IWebDriver driver, string username)
     {
         // Navigate to the user's profile
         driver.Navigate().GoToUrl($"https://www.instagram.com/{username}/");
-        Thread.Sleep(5000);
+        Thread.Sleep(10000);
 
         var followButton = driver.FindElement(By.XPath("//button//div[text()='Follow']"));
         followButton.Click();
         Console.WriteLine($"Followed: {count}.{username}");
         count++;
 
-        Thread.Sleep(3000);
+        Thread.Sleep(5000);
     }
     catch (NoSuchElementException)
     {
