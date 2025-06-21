@@ -1,24 +1,145 @@
-﻿using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System.Text.Json;
 
 int count = 1;
 #region Block
 //string username = "here_its_me_only";
 //string password = "RainbowAbhisar@25";
-//string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt"; // Text file containing Instagram usernames
+string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt"; // Text file containing Instagram usernames
 //string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 #endregion
 
 #region Follow
-string username = "c_h_o_k_o_007";
+//string username = "c_h_o_k_o_007";
+//string password = "RainbowAbhisar@25";
+//string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts_follow.txt"; // Text file containing Instagram usernames
+//string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies_follow.json";
+#endregion
+
+#region Block
+string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
-string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts_follow.txt"; // Text file containing Instagram usernames
-string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies_follow.json";
+string videoFolder = "D:\\Reels\\500+ AI HEALTH REELS BUNDLE NEW"; // Text file containing Instagram usernames
+string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 #endregion
 
 //BlockAccounts();
-FollowAccounts();
+//FollowAccounts();
+UploadVideos();
+
+void UploadVideos()
+{
+    ChromeOptions options = new ChromeOptions();
+    options.AddArgument("--start-maximized"); // Open browser in maximized mode
+
+    using (var driver = new ChromeDriver(options))
+    {
+        // Navigate to Instagram login page
+        driver.Navigate().GoToUrl("https://www.instagram.com/accounts/login/");
+        Thread.Sleep(5000);
+
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+
+        if (File.Exists(cookiesFile))
+        {
+            LoadCookies(driver, cookiesFile);
+            driver.Navigate().Refresh();
+            Thread.Sleep(3000);
+        }
+
+        if (!IsLoggedIn(driver))
+        {
+            Login(driver);
+            SaveCookies(driver, cookiesFile);
+        }
+
+        var videoFiles = Directory.GetFiles(videoFolder, "*.*")
+            .Where(f => f.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        foreach (var videoPath in videoFiles)
+        {
+            UploadVideo(driver, wait, videoPath);
+        }
+
+        Console.WriteLine("All done!");
+    }
+}
+
+static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
+{
+    try
+    {
+        // Click the “Create” button
+        var createBtn = wait.Until(d => d.FindElement(By.XPath("//span[text()='Create']")));
+        createBtn.Click();
+        Thread.Sleep(2000);
+
+        var postBtn = wait.Until(d => d.FindElement(By.XPath("//span[text()='Post']")));
+        postBtn.Click();
+        Thread.Sleep(2000);
+
+        // ✅ Locate hidden file input (not the button)
+        var fileInput = wait.Until(d => d.FindElement(By.XPath("//input[@type='file']")));
+        fileInput.SendKeys(videoPath);
+        Thread.Sleep(10000);
+
+        var okButtons = driver.FindElements(By.XPath("//button[text()='OK']"));
+        if (okButtons.Count > 0)
+        {
+            okButtons[0].Click();
+            Thread.Sleep(1000);
+        }
+
+        Thread.Sleep(5000);
+
+        var selectCropBtn = wait.Until(d => d.FindElement(By.XPath("//*[name()='svg' and @aria-label='Select crop']")));
+        selectCropBtn.Click();
+        Thread.Sleep(2000);
+        
+        var selectRatioBtn = wait.Until(d => d.FindElement(By.XPath("//span[text()='9:16']")));
+        selectRatioBtn.Click();
+        Thread.Sleep(2000);
+
+        // Click Next (possibly twice)
+        var nextBtn1 = wait.Until(d => d.FindElements(By.XPath("//div[text()='Next']/..")));
+        foreach (var btn in nextBtn1) btn.Click();
+        Thread.Sleep(3000);
+
+        // Click Next (possibly twice)
+        var nextBtn2 = wait.Until(d => d.FindElements(By.XPath("//div[text()='Next']/..")));
+        foreach (var btn in nextBtn2) btn.Click();
+        Thread.Sleep(3000);
+
+        // Add caption
+        var captionArea = wait.Until(d => d.FindElement(By.XPath("//div[@aria-label='Write a caption...' and @contenteditable='true']")));
+        captionArea.SendKeys("AI HEALTH REEL: " + Path.GetFileNameWithoutExtension(videoPath));
+        Thread.Sleep(2000);
+
+        // Click Share
+        var shareBtn = wait.Until(d => d.FindElement(By.XPath("//div[text()='Share']/..")));
+        shareBtn.Click();
+        
+        // wait for upload
+        WebDriverWait waitForUpload = new WebDriverWait(driver, TimeSpan.FromSeconds(100000));
+        waitForUpload.Until(ExpectedConditions.ElementIsVisible(By.XPath("//h3[text()='Your reel has been shared.']")));
+        Console.WriteLine("Shared: " + Path.GetFileName(videoPath));
+
+        Random rnd = new Random();
+        int number = rnd.Next(20000, 50000);
+        Thread.Sleep(number); 
+
+        //refreshpage
+        driver.Navigate().Refresh();        
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Failed to upload " + Path.GetFileName(videoPath) + ": " + ex.Message);
+    }
+}
 
 void FollowAccounts()
 {
@@ -142,6 +263,9 @@ void Login(IWebDriver driver)
     driver.FindElement(By.Name("password")).SendKeys(Keys.Enter);
     Thread.Sleep(7000); // Wait for login
 
+    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+    DismissDialogs(driver, wait);
+
     Console.WriteLine("Logged in and cookies saved.");
 }
 
@@ -170,6 +294,23 @@ static void SaveCookies(IWebDriver driver, string cookiesFile)
     }
 
     File.WriteAllText(cookiesFile, JsonSerializer.Serialize(serializableCookies));
+}
+
+static void DismissDialogs(IWebDriver driver, WebDriverWait wait)
+{
+    try
+    {
+        wait.Until(d => d.FindElement(By.XPath("//button[text()='Not Now']"))).Click();
+        Thread.Sleep(2000);
+    }
+    catch { }
+
+    try
+    {
+        wait.Until(d => d.FindElement(By.XPath("//button[text()='Not Now']"))).Click();
+        Thread.Sleep(2000);
+    }
+    catch { }
 }
 
 static void LoadCookies(IWebDriver driver, string cookiesFile)
