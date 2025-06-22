@@ -19,10 +19,10 @@ string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt
 //string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies_follow.json";
 #endregion
 
-#region Block
+#region UploadVideos
 string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
-string videoFolder = "D:\\Reels\\500+ AI HEALTH REELS BUNDLE NEW"; // Text file containing Instagram usernames
+string videoFolder = "D:\\Reels\\420+ reels"; // Text file containing Instagram usernames
 string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 #endregion
 
@@ -32,15 +32,19 @@ UploadVideos();
 
 void UploadVideos()
 {
-    // Initialize ChromeOptions for headless mode
+    // Initialize WebDriver
     ChromeOptions options = new ChromeOptions();
-    options.AddArgument("--headless"); // Run in headless mode (no GUI)
-    options.AddArgument("--disable-gpu"); // Recommended for headless mode
-    options.AddArgument("--window-size=1920,1080"); // Set window size
-    options.AddArgument("--no-sandbox"); // Bypass OS security model
-    options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
-    options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
-    options.AddArgument("--enable-unsafe-swiftshader");
+    options.AddArgument("--start-maximized"); // Open browser in maximized mode
+
+    //// Initialize ChromeOptions for headless mode
+    //ChromeOptions options = new ChromeOptions();
+    //options.AddArgument("--headless"); // Run in headless mode (no GUI)
+    //options.AddArgument("--disable-gpu"); // Recommended for headless mode
+    //options.AddArgument("--window-size=1920,1080"); // Set window size
+    //options.AddArgument("--no-sandbox"); // Bypass OS security model
+    //options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
+    //options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+    //options.AddArgument("--enable-unsafe-swiftshader");
 
     using (var driver = new ChromeDriver(options))
     {
@@ -149,7 +153,7 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
 
         // Add caption
         var captionArea = wait.Until(d => d.FindElement(By.XPath("//div[@aria-label='Write a caption...' and @contenteditable='true']")));
-        captionArea.SendKeys("AI HEALTH REEL: " + Path.GetFileNameWithoutExtension(videoPath));
+        captionArea.SendKeys("Motivation: " + Path.GetFileNameWithoutExtension(videoPath));
         Thread.Sleep(2000);
 
         // Click Share
