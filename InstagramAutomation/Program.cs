@@ -32,8 +32,15 @@ UploadVideos();
 
 void UploadVideos()
 {
+    // Initialize ChromeOptions for headless mode
     ChromeOptions options = new ChromeOptions();
-    options.AddArgument("--start-maximized"); // Open browser in maximized mode
+    options.AddArgument("--headless"); // Run in headless mode (no GUI)
+    options.AddArgument("--disable-gpu"); // Recommended for headless mode
+    options.AddArgument("--window-size=1920,1080"); // Set window size
+    options.AddArgument("--no-sandbox"); // Bypass OS security model
+    options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
+    options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+    options.AddArgument("--enable-unsafe-swiftshader");
 
     using (var driver = new ChromeDriver(options))
     {
@@ -154,12 +161,31 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         waitForUpload.Until(ExpectedConditions.ElementIsVisible(By.XPath("//h3[text()='Your reel has been shared.']")));
         Console.WriteLine("Uploaded: " + Path.GetFileName(videoPath));
 
+        // ✅ Move uploaded file to 'Uploaded' subfolder
+        string uploadedFolder = Path.Combine(Path.GetDirectoryName(videoPath), "Uploaded");
+        if (!Directory.Exists(uploadedFolder))
+        {
+            Directory.CreateDirectory(uploadedFolder);
+        }
+
+        string destFilePath = Path.Combine(uploadedFolder, Path.GetFileName(videoPath));
+
+        // Optional: avoid overwrite
+        if (File.Exists(destFilePath))
+        {
+            File.Delete(destFilePath); // or rename with timestamp
+        }
+
+        File.Move(videoPath, destFilePath);
+        Console.WriteLine("Moved to Uploaded folder.");
+
+        // Random delay
         Random rnd = new Random();
         int number = rnd.Next(20000, 50000);
-        Thread.Sleep(number); 
+        Thread.Sleep(number);
 
-        //refreshpage
-        driver.Navigate().Refresh();        
+        // Refresh page
+        driver.Navigate().Refresh();
     }
     catch (Exception ex)
     {
