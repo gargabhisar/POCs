@@ -73,6 +73,32 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
 {
     try
     {
+        bool isLoaded = false;
+        int maxAttempts = 5;
+        int attempts = 0;
+
+        do
+        {
+            try
+            {
+                WebDriverWait waitForInsta = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                waitForInsta.Until(ExpectedConditions.ElementIsVisible(By.XPath("//span[text()='Home']")));
+                isLoaded = true;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                attempts++;
+                if (attempts >= maxAttempts)
+                {
+                    Console.WriteLine("Page did not load after maximum attempts. Stopping...");
+                    break; // or throw new Exception("Page failed to load.");
+                }
+
+                driver.Navigate().Refresh();
+            }
+        }
+        while (!isLoaded);
+
         // Click the “Create” button
         var createBtn = wait.Until(d => d.FindElement(By.XPath("//span[text()='Create']")));
         createBtn.Click();
@@ -126,7 +152,7 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         // wait for upload
         WebDriverWait waitForUpload = new WebDriverWait(driver, TimeSpan.FromSeconds(100000));
         waitForUpload.Until(ExpectedConditions.ElementIsVisible(By.XPath("//h3[text()='Your reel has been shared.']")));
-        Console.WriteLine("Shared: " + Path.GetFileName(videoPath));
+        Console.WriteLine("Uploaded: " + Path.GetFileName(videoPath));
 
         Random rnd = new Random();
         int number = rnd.Next(20000, 50000);
