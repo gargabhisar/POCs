@@ -87,6 +87,7 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         bool isLoaded = false;
         int maxAttempts = 5;
         int attempts = 0;
+        Random rnd = new Random();
 
         do
         {
@@ -113,56 +114,74 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         // Click the “Create” button
         var createBtn = wait.Until(d => d.FindElement(By.XPath("//span[text()='Create']")));
         createBtn.Click();
-        Thread.Sleep(2000);
+        Thread.Sleep(rnd.Next(2000, 5000));
 
         var postBtn = wait.Until(d => d.FindElement(By.XPath("//span[text()='Post']")));
         postBtn.Click();
-        Thread.Sleep(2000);
+        Thread.Sleep(rnd.Next(2000, 5000));
 
         // ✅ Locate hidden file input (not the button)
         var fileInput = wait.Until(d => d.FindElement(By.XPath("//input[@type='file']")));
         fileInput.SendKeys(videoPath);
-        Thread.Sleep(10000);
+        Thread.Sleep(rnd.Next(10000, 15000));
+
+        Console.WriteLine("Starting: " + Path.GetFileName(videoPath));
 
         var okButtons = driver.FindElements(By.XPath("//button[text()='OK']"));
         if (okButtons.Count > 0)
         {
             okButtons[0].Click();
-            Thread.Sleep(1000);
+            Thread.Sleep(rnd.Next(2000, 5000));
         }
 
-        Thread.Sleep(5000);
+        Thread.Sleep(rnd.Next(5000, 10000));
 
         var selectCropBtn = wait.Until(d => d.FindElement(By.XPath("//*[name()='svg' and @aria-label='Select crop']")));
         selectCropBtn.Click();
-        Thread.Sleep(2000);
+        Thread.Sleep(rnd.Next(2000, 5000));
         
         var selectRatioBtn = wait.Until(d => d.FindElement(By.XPath("//span[text()='9:16']")));
         selectRatioBtn.Click();
-        Thread.Sleep(2000);
+        Thread.Sleep(rnd.Next(2000, 5000));
 
         // Click Next (possibly twice)
         var nextBtn1 = wait.Until(d => d.FindElements(By.XPath("//div[text()='Next']/..")));
         foreach (var btn in nextBtn1) btn.Click();
-        Thread.Sleep(3000);
+        Thread.Sleep(rnd.Next(2000, 5000));
 
         // Click Next (possibly twice)
         var nextBtn2 = wait.Until(d => d.FindElements(By.XPath("//div[text()='Next']/..")));
         foreach (var btn in nextBtn2) btn.Click();
-        Thread.Sleep(3000);
+        Thread.Sleep(rnd.Next(2000, 5000));
 
         // Add caption
         var captionArea = wait.Until(d => d.FindElement(By.XPath("//div[@aria-label='Write a caption...' and @contenteditable='true']")));
         captionArea.SendKeys("Motivation: " + Path.GetFileNameWithoutExtension(videoPath));
-        Thread.Sleep(2000);
+        Thread.Sleep(rnd.Next(2000, 5000));
 
         // Click Share
         var shareBtn = wait.Until(d => d.FindElement(By.XPath("//div[text()='Share']/..")));
         shareBtn.Click();
-        
+
         // wait for upload
         WebDriverWait waitForUpload = new WebDriverWait(driver, TimeSpan.FromSeconds(100000));
-        waitForUpload.Until(ExpectedConditions.ElementIsVisible(By.XPath("//h3[text()='Your reel has been shared.']")));
+
+        waitForUpload.Until(driver =>
+        {
+            try
+            {
+                waitForUpload.Until(ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[@aria-label='Sharing']")));
+                return true;
+            }
+            catch
+            {
+                waitForUpload.Until(ExpectedConditions.ElementIsVisible(By.XPath("//h3[text()='Your reel has been shared.']")));
+                return true;
+            }
+        });
+
+        //waitForUpload.Until(ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[@aria-label='Sharing']")));
+        //waitForUpload.Until(ExpectedConditions.ElementIsVisible(By.XPath("//h3[text()='Your reel has been shared.']")));
         Console.WriteLine("Uploaded: " + Path.GetFileName(videoPath));
 
         // ✅ Move uploaded file to 'Uploaded' subfolder
@@ -184,7 +203,6 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         Console.WriteLine("Moved to Uploaded folder.");
 
         // Random delay
-        Random rnd = new Random();
         int number = rnd.Next(20000, 50000);
         Thread.Sleep(number);
 
