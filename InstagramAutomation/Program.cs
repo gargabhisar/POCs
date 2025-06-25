@@ -22,7 +22,7 @@ string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt
 #region UploadVideos
 string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
-string videoFolder = "D:\\Reels\\420+ reels"; // Text file containing Instagram usernames
+string videoFolder = "D:\\Reels\\420+ Reeels"; // Text file containing Instagram usernames
 string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 #endregion
 
@@ -155,8 +155,31 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         Thread.Sleep(rnd.Next(2000, 5000));
 
         // Add caption
+        List<string> hashtags = new List<string>
+        {
+            "#MotivationDaily", "#NeverGiveUp", "#YouCanDoIt", "#MindsetMatters", "#SuccessMindset",
+            "#GrowthMindset", "#InspireOthers", "#DreamBigWorkHard", "#SelfBelief", "#DisciplineEqualsFreedom",
+            "#KeepPushing", "#LevelUpMindset", "#MotivatedMindset", "#BetterEveryday", "#FocusOnYou",
+            "#BuildYourDream", "#PositiveVibesOnly", "#QuoteOfTheDay", "#WakeUpWithPurpose", "#WordsToLiveBy", 
+            "#ReelMotivation", "#ReelItFeelIt", "#ExplorePage", "#ViralReels", "#DailyInspiration", 
+            "#FuelYourFire", "#InnerStrength", "#IGMotivation", "#MotivationReels", "#OwnYourStory", 
+            "#PushThrough", "#StayHungry", "#RiseAndGrind", "#HustleHard", "#DailyGrind", 
+            "#YouGotThis", "#SuccessDriven", "#ChaseYourDreams", "#MotivationNation", "#MindOverMatter", 
+            "#GrindMode", "#PowerOfPositivity", "#NoExcuses", "#BelieveInYourself", "#WorkHardStayHumble", 
+            "#HardWorkPaysOff", "#StayMotivated", "#MakeItHappen", "#StayInspired", "#BeUnstoppable", 
+            "#AmbitionOnFleek", "#KeepGrinding", "#LimitlessMindset", "#DrivenToSucceed", "#FearlessPursuit", 
+            "#RelentlessEffort", "#InnerDrive", "#SuccessFuel", "#WinnersMindset", "#ThinkPositive"
+        };
+
+        // Shuffle and take 15 randomly
+        Random rng = new Random();
+        List<string> selected = hashtags.OrderBy(x => rng.Next()).Take(15).ToList();
+
+        // Join as space-separated string
+        string result = string.Join(" ", selected);
+        
         var captionArea = wait.Until(d => d.FindElement(By.XPath("//div[@aria-label='Write a caption...' and @contenteditable='true']")));
-        captionArea.SendKeys("Motivation: " + Path.GetFileNameWithoutExtension(videoPath));
+        captionArea.SendKeys("Motivation: " + Path.GetFileNameWithoutExtension(videoPath) + " " + result);
         Thread.Sleep(rnd.Next(2000, 5000));
 
         // Click Share
@@ -200,7 +223,8 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         }
 
         File.Move(videoPath, destFilePath);
-        Console.WriteLine("Moved to Uploaded folder.");
+        Console.WriteLine(Path.GetFileName(videoPath) + ": Moved to Uploaded folder.");
+        Console.WriteLine("===========================================================");
 
         // Random delay
         int number = rnd.Next(20000, 50000);
