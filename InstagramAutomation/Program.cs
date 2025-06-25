@@ -24,6 +24,7 @@ string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
 string videoFolder = "D:\\Reels\\420+ Reeels"; // Text file containing Instagram usernames
 string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
+int videoUploadCount = 1; // Counter for uploaded videos
 #endregion
 
 //BlockAccounts();
@@ -74,13 +75,14 @@ void UploadVideos()
         foreach (var videoPath in videoFiles)
         {
             UploadVideo(driver, wait, videoPath);
+            videoUploadCount++;
         }
 
         Console.WriteLine("All done!");
     }
 }
 
-static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
+void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
 {
     try
     {
@@ -224,6 +226,7 @@ static void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
 
         File.Move(videoPath, destFilePath);
         Console.WriteLine(Path.GetFileName(videoPath) + ": Moved to Uploaded folder.");
+        Console.WriteLine("Total Upload count: " + videoUploadCount); 
         Console.WriteLine("===========================================================");
 
         // Random delay
