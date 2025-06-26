@@ -22,7 +22,7 @@ string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt
 #region UploadVideos
 string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
-string videoFolder = "D:\\Reels\\420+ Reeels"; // Text file containing Instagram usernames
+string videoFolder = "D:\\Reels\\Motivation Reels-20240419T080913Z-002\\Motivation Reels\\200+-20220513T152717Z-001\\200+"; // Text file containing Instagram usernames
 string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 int videoUploadCount = 1; // Counter for uploaded videos
 #endregion
@@ -34,18 +34,19 @@ UploadVideos();
 void UploadVideos()
 {
     // Initialize WebDriver
-    ChromeOptions options = new ChromeOptions();
-    options.AddArgument("--start-maximized"); // Open browser in maximized mode
+    //ChromeOptions options = new ChromeOptions();
+    //options.AddArgument("--start-maximized"); // Open browser in maximized mode
 
     //// Initialize ChromeOptions for headless mode
-    //ChromeOptions options = new ChromeOptions();
-    //options.AddArgument("--headless"); // Run in headless mode (no GUI)
-    //options.AddArgument("--disable-gpu"); // Recommended for headless mode
-    //options.AddArgument("--window-size=1920,1080"); // Set window size
-    //options.AddArgument("--no-sandbox"); // Bypass OS security model
-    //options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
-    //options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
-    //options.AddArgument("--enable-unsafe-swiftshader");
+    ChromeOptions options = new ChromeOptions();
+    options.AddArgument("--headless"); // Run in headless mode (no GUI)
+    options.AddArgument("--disable-gpu"); // Recommended for headless mode
+    options.AddArgument("--window-size=1920,1080"); // Set window size
+    options.AddArgument("--no-sandbox"); // Bypass OS security model
+    options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
+    options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+    options.AddArgument("--enable-unsafe-swiftshader");
+    options.AddArgument("log-level=3"); // Suppresses INFO and WARNING logs
 
     using (var driver = new ChromeDriver(options))
     {
@@ -127,6 +128,7 @@ void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         fileInput.SendKeys(videoPath);
         Thread.Sleep(rnd.Next(10000, 15000));
 
+        Console.WriteLine("===========================================================");
         Console.WriteLine("Starting: " + Path.GetFileName(videoPath));
 
         var okButtons = driver.FindElements(By.XPath("//button[text()='OK']"));
@@ -162,20 +164,35 @@ void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
             "#MotivationDaily", "#NeverGiveUp", "#YouCanDoIt", "#MindsetMatters", "#SuccessMindset",
             "#GrowthMindset", "#InspireOthers", "#DreamBigWorkHard", "#SelfBelief", "#DisciplineEqualsFreedom",
             "#KeepPushing", "#LevelUpMindset", "#MotivatedMindset", "#BetterEveryday", "#FocusOnYou",
-            "#BuildYourDream", "#PositiveVibesOnly", "#QuoteOfTheDay", "#WakeUpWithPurpose", "#WordsToLiveBy", 
-            "#ReelMotivation", "#ReelItFeelIt", "#ExplorePage", "#ViralReels", "#DailyInspiration", 
-            "#FuelYourFire", "#InnerStrength", "#IGMotivation", "#MotivationReels", "#OwnYourStory", 
-            "#PushThrough", "#StayHungry", "#RiseAndGrind", "#HustleHard", "#DailyGrind", 
-            "#YouGotThis", "#SuccessDriven", "#ChaseYourDreams", "#MotivationNation", "#MindOverMatter", 
-            "#GrindMode", "#PowerOfPositivity", "#NoExcuses", "#BelieveInYourself", "#WorkHardStayHumble", 
-            "#HardWorkPaysOff", "#StayMotivated", "#MakeItHappen", "#StayInspired", "#BeUnstoppable", 
-            "#AmbitionOnFleek", "#KeepGrinding", "#LimitlessMindset", "#DrivenToSucceed", "#FearlessPursuit", 
-            "#RelentlessEffort", "#InnerDrive", "#SuccessFuel", "#WinnersMindset", "#ThinkPositive"
+            "#BuildYourDream", "#PositiveVibesOnly", "#QuoteOfTheDay", "#WakeUpWithPurpose", "#WordsToLiveBy",
+            "#ReelMotivation", "#ReelItFeelIt", "#ExplorePage", "#ViralReels", "#DailyInspiration",
+            "#FuelYourFire", "#InnerStrength", "#IGMotivation", "#MotivationReels", "#OwnYourStory",
+            "#PushThrough", "#StayHungry", "#RiseAndGrind", "#HustleHard", "#DailyGrind",
+            "#YouGotThis", "#SuccessDriven", "#ChaseYourDreams", "#MotivationNation", "#MindOverMatter",
+            "#GrindMode", "#PowerOfPositivity", "#NoExcuses", "#BelieveInYourself", "#WorkHardStayHumble",
+            "#HardWorkPaysOff", "#StayMotivated", "#MakeItHappen", "#StayInspired", "#BeUnstoppable",
+            "#AmbitionOnFleek", "#KeepGrinding", "#LimitlessMindset", "#DrivenToSucceed", "#FearlessPursuit",
+            "#RelentlessEffort", "#InnerDrive", "#SuccessFuel", "#WinnersMindset", "#ThinkPositive",
+            "#amazingposts", "#quotesamazing", "#familyquotes", "#richquotes", "#lifestagram", "#quotesoninstagram",
+            "#telegramgroup", "#sharequotes", "#whyimsingle", "#alwaysthinkpositive", "#gainwhenyousacrifice",
+            "#jealousyquotes", "#failurequotes", "#failureisnotanoption", "#failureispartofsuccess", "#jackma",
+            "#jackmaquotes", "#motivationalspeaker", "#motivationalspeech", "#motivationalvideos", "#inspirationvideo",
+            "#millionairestutor", "#investor", "#investingtips", "#investmentstrategies", "#successmentor",
+            "#businessmentor", "#mentorclub", "#mindsetreset", "#mindsetofgreatness", "#mindsetmatters", "#mindsetmastery",
+            "#mindsetcreator", "#businesstip", "#successfulmindset", "#investors", "#investorlife", "#investors",
+            "#investinrealestate", "#entrepreneurquotes", "#businessquote", "#millionairestutor", "#entrepreneur101",
+            "#entrepreneurcoach", "#entrepreneurquote", "#entrepreneurgoals", "#entrepreneurspirit", "#entrepreneurmindset",
+            "#entrepreneurs", "#entrepreneur", "#entrepreneurshipeducation", "#entrepreneurships", "#entrepreneurshipgoals",
+            "#entrepreneurshiptips", "#entrepreneurshiplife", "#entrepreneurshipquotes", "#entrepreneurshipquote",
+            "#entrepreneurshipschool", "#getbigordietrying", "#mostmuscular", "#vtaper", "#classicbodybuilder",
+            "#arnoldpress", "#goldenerabodybuilding", "#arnoldclassicbrasil", "#alexanderarnold", "#trentalexanderarnold",
+            "#arnoldehret", "#entrepreneurtips", "#entrepreneurtip", "#careergoals", "#careeradvice", "#careerdevelopment",
+            "#careerday", "#careercoach", "#companyculture", "#businesstip", "#businessgoals"
         };
 
         // Shuffle and take 15 randomly
         Random rng = new Random();
-        List<string> selected = hashtags.OrderBy(x => rng.Next()).Take(15).ToList();
+        List<string> selected = hashtags.OrderBy(x => rng.Next()).Take(20).ToList();
 
         // Join as space-separated string
         string result = string.Join(" ", selected);
@@ -225,7 +242,7 @@ void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         }
 
         File.Move(videoPath, destFilePath);
-        Console.WriteLine(Path.GetFileName(videoPath) + ": Moved to Uploaded folder.");
+        Console.WriteLine("Moved \"" + Path.GetFileName(videoPath) + "\" to Uploaded folder.");
         Console.WriteLine("Total Upload count: " + videoUploadCount); 
         Console.WriteLine("===========================================================");
 
