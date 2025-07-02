@@ -14,7 +14,7 @@ string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt
 
 #region Follow
 //string username = "c_h_o_k_o_007";
-//string password = "RainbowAbhisar@25";
+//string password = "";
 //string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts_follow.txt"; // Text file containing Instagram usernames
 //string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies_follow.json";
 #endregion
@@ -22,7 +22,7 @@ string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt
 #region UploadVideos
 string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
-string videoFolder = "D:\\Reels\\Motivation Reels-20240419T080913Z-002\\Motivation Reels\\200+-20220513T152717Z-001\\200+"; // Text file containing Instagram usernames
+string videoFolder = "D:\\Reels\\Motivational 50+"; // Text file containing Instagram usernames
 string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 int videoUploadCount = 1; // Counter for uploaded videos
 #endregion
@@ -34,19 +34,19 @@ UploadVideos();
 void UploadVideos()
 {
     // Initialize WebDriver
-    ChromeOptions options = new ChromeOptions();
-    options.AddArgument("--start-maximized"); // Open browser in maximized mode
-
-    //// Initialize ChromeOptions for headless mode
     //ChromeOptions options = new ChromeOptions();
-    //options.AddArgument("--headless"); // Run in headless mode (no GUI)
-    //options.AddArgument("--disable-gpu"); // Recommended for headless mode
-    //options.AddArgument("--window-size=1920,1080"); // Set window size
-    //options.AddArgument("--no-sandbox"); // Bypass OS security model
-    //options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
-    //options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
-    //options.AddArgument("--enable-unsafe-swiftshader");
-    //options.AddArgument("log-level=3"); // Suppresses INFO and WARNING logs
+    //options.AddArgument("--start-maximized"); // Open browser in maximized mode
+
+    // Initialize ChromeOptions for headless mode
+    ChromeOptions options = new ChromeOptions();
+    options.AddArgument("--headless"); // Run in headless mode (no GUI)
+    options.AddArgument("--disable-gpu"); // Recommended for headless mode
+    options.AddArgument("--window-size=1920,1080"); // Set window size
+    options.AddArgument("--no-sandbox"); // Bypass OS security model
+    options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
+    options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+    options.AddArgument("--enable-unsafe-swiftshader");
+    options.AddArgument("log-level=3"); // Suppresses INFO and WARNING logs
 
     using (var driver = new ChromeDriver(options))
     {
@@ -201,9 +201,11 @@ void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
 
         // Join as space-separated string
         string result = string.Join(" ", selected);
-        
+
+        string disclaimer = "Disclaimer: This video is for motivational purposes only.\r\n⚠ Not my content. All credit to the rightful owner.\r\n☑ If you know the original creator, tag them below.\r\n✘ DM for credit/removal.\r\n#nocopyrightintended #creditsgoestoowner\r\n";
+
         var captionArea = wait.Until(d => d.FindElement(By.XPath("//div[@aria-label='Write a caption...' and @contenteditable='true']")));
-        captionArea.SendKeys("Motivation: " + Path.GetFileNameWithoutExtension(videoPath) + " " + result);
+        captionArea.SendKeys("Motivation: " + Path.GetFileNameWithoutExtension(videoPath) + Environment.NewLine + Environment.NewLine + disclaimer + Environment.NewLine + result);
         Thread.Sleep(rnd.Next(2000, 5000));
 
         // Click Share
