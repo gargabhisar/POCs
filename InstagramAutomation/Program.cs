@@ -22,7 +22,7 @@ string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt
 #region UploadVideos
 string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
-string videoFolder = "D:\\Reels\\Motivational 50+"; // Text file containing Instagram usernames
+string videoFolder = "D:\\Reels\\1360+ Motivational Reels (English)-20240419T135804Z-001\\1360+ Motivational Reels (English)\\VIRAL REELS PRO TEMPLATES 1001 - 1365 Videos"; // Text file containing Instagram usernames
 string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 int videoUploadCount = 1; // Counter for uploaded videos
 #endregion
@@ -34,19 +34,19 @@ UploadVideos();
 void UploadVideos()
 {
     // Initialize WebDriver
-    //ChromeOptions options = new ChromeOptions();
-    //options.AddArgument("--start-maximized"); // Open browser in maximized mode
-
-    // Initialize ChromeOptions for headless mode
     ChromeOptions options = new ChromeOptions();
-    options.AddArgument("--headless"); // Run in headless mode (no GUI)
-    options.AddArgument("--disable-gpu"); // Recommended for headless mode
-    options.AddArgument("--window-size=1920,1080"); // Set window size
-    options.AddArgument("--no-sandbox"); // Bypass OS security model
-    options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
-    options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
-    options.AddArgument("--enable-unsafe-swiftshader");
-    options.AddArgument("log-level=3"); // Suppresses INFO and WARNING logs
+    options.AddArgument("--start-maximized"); // Open browser in maximized mode
+
+    //// Initialize ChromeOptions for headless mode
+    //ChromeOptions options = new ChromeOptions();
+    //options.AddArgument("--headless"); // Run in headless mode (no GUI)
+    //options.AddArgument("--disable-gpu"); // Recommended for headless mode
+    //options.AddArgument("--window-size=1920,1080"); // Set window size
+    //options.AddArgument("--no-sandbox"); // Bypass OS security model
+    //options.AddArgument("--disable-dev-shm-usage"); // Overcome resource limits
+    //options.AddArgument("--disable-blink-features=AutomationControlled"); // Avoid detection
+    //options.AddArgument("--enable-unsafe-swiftshader");
+    //options.AddArgument("log-level=3"); // Suppresses INFO and WARNING logs
 
     using (var driver = new ChromeDriver(options))
     {
@@ -77,7 +77,7 @@ void UploadVideos()
         {
             UploadVideo(driver, wait, videoPath);
             videoUploadCount++;
-            if(videoUploadCount > 100)
+            if(videoUploadCount > 98)
             {
                 Console.WriteLine("Reached upload limit of 100 videos. Stopping...");
                 break; // Stop after uploading 100 videos
