@@ -22,7 +22,7 @@ string filePath = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\accounts.txt
 #region UploadVideos
 string username = "here_its_me_only";
 string password = "RainbowAbhisar@25";
-string videoFolder = "D:\\Reels\\1360+ Motivational Reels (English)-20240419T135804Z-001\\1360+ Motivational Reels (English)\\VIRAL REELS PRO TEMPLATES 1001 - 1365 Videos"; // Text file containing Instagram usernames
+string videoFolder = "D:\\Reels\\1400+ Hindi Motivational Reels -20240419T125147Z-001\\1400+ Hindi Motivational Reels"; // Text file containing Instagram usernames
 string cookiesFile = "G:\\Projects\\POCs\\InstagramAutomation\\Assets\\cookies.json";
 int videoUploadCount = 1; // Counter for uploaded videos
 #endregion
@@ -72,14 +72,14 @@ void UploadVideos()
         var videoFiles = Directory.GetFiles(videoFolder, "*.*")
             .Where(f => f.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
             .ToList();
-
+        int fileCount = 22;
         foreach (var videoPath in videoFiles)
         {
             UploadVideo(driver, wait, videoPath);
             videoUploadCount++;
-            if(videoUploadCount > 98)
+            if(videoUploadCount > fileCount)
             {
-                Console.WriteLine("Reached upload limit of 100 videos. Stopping...");
+                Console.WriteLine("Reached upload limit of " + fileCount + " videos. Stopping...");
                 break; // Stop after uploading 100 videos
             }   
         }
@@ -389,7 +389,7 @@ void Login(IWebDriver driver)
     Thread.Sleep(7000); // Wait for login
 
     var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-    DismissDialogs(driver, wait);
+    //DismissDialogs(driver, wait);
 
     Console.WriteLine("Logged in and cookies saved.");
 }
