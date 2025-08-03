@@ -72,7 +72,7 @@ void UploadVideos()
         var videoFiles = Directory.GetFiles(videoFolder, "*.*")
             .Where(f => f.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
             .ToList();
-        int fileCount = 22;
+        int fileCount = 100;
         foreach (var videoPath in videoFiles)
         {
             UploadVideo(driver, wait, videoPath);
