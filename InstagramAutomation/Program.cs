@@ -72,7 +72,7 @@ void UploadVideos()
         var videoFiles = Directory.GetFiles(videoFolder, "*.*")
             .Where(f => f.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
             .ToList();
-        int fileCount = 100;
+        int fileCount = 500;
         foreach (var videoPath in videoFiles)
         {
             UploadVideo(driver, wait, videoPath);
@@ -134,7 +134,7 @@ void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
         Thread.Sleep(rnd.Next(10000, 15000));
 
         Console.WriteLine("===========================================================");
-        Console.WriteLine("Starting: " + Path.GetFileName(videoPath));
+        Console.WriteLine("Starting: " + Path.GetFileName(videoPath) + " At Time: " + DateTime.Now);
 
         var okButtons = driver.FindElements(By.XPath("//button[text()='OK']"));
         if (okButtons.Count > 0)
@@ -231,7 +231,7 @@ void UploadVideo(IWebDriver driver, WebDriverWait wait, string videoPath)
 
         //waitForUpload.Until(ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[@aria-label='Sharing']")));
         //waitForUpload.Until(ExpectedConditions.ElementIsVisible(By.XPath("//h3[text()='Your reel has been shared.']")));
-        Console.WriteLine("Uploaded: " + Path.GetFileName(videoPath));
+        Console.WriteLine("Uploaded: " + Path.GetFileName(videoPath) + " At Time: " + DateTime.Now);
 
         // ✅ Move uploaded file to 'Uploaded' subfolder
         string uploadedFolder = Path.Combine(Path.GetDirectoryName(videoPath), "Uploaded");

@@ -1,0 +1,6 @@
+@DelhiveryOne_HostAddress = http://localhost:5165
+
+GET {{DelhiveryOne_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
