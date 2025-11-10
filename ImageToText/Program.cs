@@ -18,6 +18,8 @@ class Program
     // You can add "+eng" to improve mixed-language text: "hin+eng"
     private const string Languages = "hin";
 
+    private static readonly string MasterDocxPath = Path.Combine(OutputFolder, "All-Hindi-Texts.docx");
+
     static void Main()
     {
         Directory.CreateDirectory(InputFolder);
@@ -28,69 +30,77 @@ class Program
         if (string.IsNullOrWhiteSpace(tessdataDir) || !Directory.Exists(tessdataDir))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("⚠️  Could not find tessdata. Set TESSDATA_PREFIX env var OR set TesseractPath in code.");
-            Console.WriteLine("    Example Windows tessdata: C:\\Program Files\\Tesseract-OCR\\tessdata");
+            Console.WriteLine("⚠️  Could not find tessdata. Set TESSDATA_PREFIX to the parent of 'tessdata' or set TesseractPath.");
             Console.ResetColor();
         }
 
-        var imageFiles = Directory.EnumerateFiles(InputFolder)
+        var images = Directory.EnumerateFiles(InputFolder)
             .Where(IsImageFile)
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (imageFiles.Count == 0)
+        if (images.Count == 0)
         {
             Console.WriteLine($"No images found in {InputFolder}");
             return;
         }
 
-        Console.WriteLine($"🖼 Found {imageFiles.Count} image(s). Starting Hindi OCR...\n");
+        Console.WriteLine($"🖼 Found {images.Count} image(s). Building a single DOCX...\n");
 
-        // Create OCR engine
         using var engine = CreateEngine(tessdataDir);
 
-        foreach (var path in imageFiles)
+        // Create master DOCX
+        using var doc = WordprocessingDocument.Create(MasterDocxPath, WordprocessingDocumentType.Document);
+        var main = doc.AddMainDocumentPart();
+        main.Document = new Document(new Body());
+
+        // Set document defaults for Hindi-friendly fonts and complex script handling
+        EnsureDocDefaults(main);
+        EnsureBasicStyles(main);
+
+        int idx = 0;
+        foreach (var path in images)
         {
-            var baseName = Path.GetFileNameWithoutExtension(path);
-            var safeName = Sanitize(baseName);
-            var outPath = Path.Combine(OutputFolder, $"{safeName}.docx");
+            idx++;
+            var fileName = Path.GetFileName(path);
 
             try
             {
                 using var img = Pix.LoadFromFile(path);
                 using var page = engine.Process(img);
-
-                // Try both raw text and layout-aware text (hOCR is HTML; we just want text)
                 var text = page.GetText()?.Trim();
 
-                // Fallback: try single-block mode for dense text
                 if (string.IsNullOrWhiteSpace(text))
                 {
                     using var page2 = engine.Process(img, PageSegMode.SingleBlock);
                     text = page2.GetText()?.Trim();
                 }
-
                 if (string.IsNullOrWhiteSpace(text))
                     text = "(कोई स्पष्ट पाठ नहीं मिला।)";
 
-                CreateHindiDocx(outPath, text);
+                // Append section to master doc
+                AppendHeading(main, fileName);
+                AppendHindiParagraphs(main, Normalize(text));
 
-                Console.WriteLine($"✅ {Path.GetFileName(path)}  →  {outPath}");
+                // Page break between items (except after last)
+                if (idx < images.Count)
+                    InsertPageBreak(main);
+
+                Console.WriteLine($"✅ {fileName}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ {Path.GetFileName(path)} failed: {ex.Message}");
+                Console.WriteLine($"❌ {fileName} failed: {ex.Message}");
             }
         }
 
-        Console.WriteLine("\n🎉 Done.");
+        main.Document.Save();
+        Console.WriteLine($"\n🎉 All done! → {MasterDocxPath}");
     }
 
-    // ——— Tesseract engine setup ———
+    // ---------- Tesseract ----------
     private static TesseractEngine CreateEngine(string? tessdataDir)
     {
-        // If tessdataDir is null, Tesseract will rely on PATH/TESSDATA_PREFIX.
-        // EngineMode.Default picks the best available (usually LSTM).
         return tessdataDir is not null
             ? new TesseractEngine(tessdataDir, Languages, EngineMode.Default)
             : new TesseractEngine(@"./tessdata_not_used_if_env_or_path", Languages, EngineMode.Default);
@@ -98,28 +108,25 @@ class Program
 
     private static string? GetTessdataDir()
     {
-        // Highest priority: TESSDATA_PREFIX env var
         var env = Environment.GetEnvironmentVariable("TESSDATA_PREFIX");
         if (!string.IsNullOrWhiteSpace(env))
-            return Path.Combine(env, "tessdata").TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            return Path.Combine(env, "tessdata");
 
-        // If user set TesseractPath above
         if (!string.IsNullOrWhiteSpace(TesseractPath))
             return Path.Combine(TesseractPath!, "tessdata");
 
-        // Common defaults (Windows)
-        var winDefault = @"C:\Program Files\Tesseract-OCR\tessdata";
-        if (Directory.Exists(winDefault)) return winDefault;
+        var win1 = @"C:\Program Files\Tesseract-OCR\tessdata";
+        if (Directory.Exists(win1)) return win1;
 
-        // Homebrew default (Apple Silicon)
-        var macArm = "/opt/homebrew/Cellar/tesseract/5.0.0/share/tessdata";
+        var win2 = @"C:\Program Files (x86)\Tesseract-OCR\tessdata";
+        if (Directory.Exists(win2)) return win2;
+
+        var macArm = "/opt/homebrew/share/tessdata";
         if (Directory.Exists(macArm)) return macArm;
 
-        // Homebrew (Intel mac)
-        var macIntel = "/usr/local/Cellar/tesseract/5.0.0/share/tessdata";
+        var macIntel = "/usr/local/share/tessdata";
         if (Directory.Exists(macIntel)) return macIntel;
 
-        // Linux common
         var linux1 = "/usr/share/tesseract-ocr/4.00/tessdata";
         if (Directory.Exists(linux1)) return linux1;
 
@@ -129,52 +136,94 @@ class Program
         return null;
     }
 
-    // ——— Word (.docx) writer with Hindi font ———
-    private static void CreateHindiDocx(string outputPath, string bodyText)
+    // ---------- DOCX helpers ----------
+    private static void EnsureDocDefaults(MainDocumentPart main)
     {
-        using var doc = WordprocessingDocument.Create(outputPath, WordprocessingDocumentType.Document);
-        var main = doc.AddMainDocumentPart();
-        main.Document = new Document(new Body());
+        if (main.StyleDefinitionsPart == null)
+            main.AddNewPart<StyleDefinitionsPart>().Styles = new Styles();
 
-        // Define a default run properties (Hindi-compatible font like Mangal or Nirmala UI)
-        var runProps = new RunProperties(
-            new RunFonts() { Ascii = "Nirmala UI", HighAnsi = "Nirmala UI", ComplexScript = "Mangal" }, // CS for Devanagari
-            new FontSize() { Val = "24" } // 12 pt (OpenXML uses half-points)
-        );
-
-        foreach (var line in NormalizeLines(bodyText))
+        var styles = main.StyleDefinitionsPart.Styles!;
+        if (styles.DocDefaults == null)
         {
-            var run = new Run(new Text(line) { Space = SpaceProcessingModeValues.Preserve });
-            run.PrependChild(runProps.CloneNode(true));
-            var para = new Paragraph(run);
-            // Enable complex script for the paragraph
-            para.ParagraphProperties = new ParagraphProperties(new BiDi()); // supports right-to-left/complex scripts
-            main.Document.Body!.AppendChild(para);
+            styles.DocDefaults = new DocDefaults(
+                new RunPropertiesDefault(
+                    new RunPropertiesBaseStyle(
+                        new RunFonts { Ascii = "Nirmala UI", HighAnsi = "Nirmala UI", ComplexScript = "Mangal" },
+                        new FontSize { Val = "24" } // 12pt default
+                    )
+                ),
+                new ParagraphPropertiesDefault(new ParagraphProperties(new BiDi()))
+            );
         }
-
-        main.Document.Save();
     }
 
-    private static IEnumerable<string> NormalizeLines(string s)
+    private static void EnsureBasicStyles(MainDocumentPart main)
+    {
+        if (main.StyleDefinitionsPart == null)
+            main.AddNewPart<StyleDefinitionsPart>().Styles = new Styles();
+
+        var styles = main.StyleDefinitionsPart.Styles!;
+        if (styles.Elements<Style>().Any(s => s.StyleId == "Heading1")) return;
+
+        styles.AppendChild(
+            new Style(
+                new StyleName() { Val = "heading 1" },
+                new BasedOn() { Val = "Normal" },
+                new UIPriority() { Val = 9 },
+                new PrimaryStyle(),
+                new StyleParagraphProperties(
+                    new KeepNext(), new KeepLines(),
+                    new SpacingBetweenLines() { After = "200" }
+                ),
+                new StyleRunProperties(
+                    new Bold(),
+                    new RunFonts { Ascii = "Nirmala UI", HighAnsi = "Nirmala UI", ComplexScript = "Mangal" },
+                    new FontSize() { Val = "32" } // 16pt
+                )
+            )
+            { Type = StyleValues.Paragraph, StyleId = "Heading1" }
+        );
+    }
+
+    private static void AppendHeading(MainDocumentPart main, string headingText)
+    {
+        var pPr = new ParagraphProperties(new ParagraphStyleId() { Val = "Heading1" });
+        var run = new Run(new Text(headingText));
+        var para = new Paragraph(pPr, run);
+        main.Document.Body!.AppendChild(para);
+    }
+
+    private static void AppendHindiParagraphs(MainDocumentPart main, IEnumerable<string> lines)
+    {
+        foreach (var line in lines)
+        {
+            var run = new Run(new Text(line) { Space = SpaceProcessingModeValues.Preserve });
+            var para = new Paragraph(run)
+            {
+                ParagraphProperties = new ParagraphProperties(new BiDi())
+            };
+            main.Document.Body!.AppendChild(para);
+        }
+    }
+
+    private static void InsertPageBreak(MainDocumentPart main)
+    {
+        var breakPara = new Paragraph(new Run(new Break() { Type = BreakValues.Page }));
+        main.Document.Body!.AppendChild(breakPara);
+    }
+
+    private static IEnumerable<string> Normalize(string s)
     {
         s ??= "";
         s = s.Replace("\r\n", "\n");
-        // Optional: merge hyphenated line breaks. Comment this out if you want raw OCR lines.
-        s = s.Replace("-\n", "");
+        s = s.Replace("-\n", "");  // fix hyphen linebreaks
         return s.Split('\n');
     }
 
-    // ——— Helpers ———
+    // ---------- misc ----------
     private static bool IsImageFile(string path)
     {
         var ext = Path.GetExtension(path).ToLowerInvariant();
         return ext is ".png" or ".jpg" or ".jpeg" or ".webp" or ".bmp" or ".tif" or ".tiff";
-    }
-
-    private static string Sanitize(string name)
-    {
-        foreach (var c in Path.GetInvalidFileNameChars())
-            name = name.Replace(c, '_');
-        return name;
     }
 }
