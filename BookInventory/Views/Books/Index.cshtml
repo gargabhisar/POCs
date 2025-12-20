@@ -1,0 +1,53 @@
+﻿@model List<BookInventory.Models.Book>
+@using BookInventory.Helpers
+@{
+    var user = SessionHelper.GetUser(Context);
+}
+
+<h3>Books Inventory</h3>
+
+<form method="get">
+    <input name="search" value="@ViewBag.Search" placeholder="Search..." />
+    <button type="submit">Search</button>
+</form>
+
+@if (user.Role == "Admin")
+{
+    <a href="/Books/Create">Add Book</a>
+}
+
+<table class="table table-bordered mt-3">
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>ISBN</th>
+        <th>Total</th>
+        <th>Locations</th>
+        @if (user.Role == "Admin")
+        {
+            <th>Action</th>
+        }
+    </tr>
+
+    @foreach (var b in Model)
+    {
+        <tr>
+            <td>@b.Title</td>
+            <td>@b.Author</td>
+            <td>@b.ISBN</td>
+            <td>@b.TotalQuantity</td>
+            <td>
+                A:@b.Locations.Almirah |
+                B:@b.Locations.Bed |
+                Box:@b.Locations.Box |
+                O:@b.Locations.Other.Quantity (@b.Locations.Other.Name)
+            </td>
+            @if (user.Role == "Admin")
+            {
+                <td>
+                    <a href="/Books/Edit/@b.Id">Edit</a>
+                </td>
+            }
+        </tr>
+    }
+</table>

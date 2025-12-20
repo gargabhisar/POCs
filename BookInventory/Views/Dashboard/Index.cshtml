@@ -1,0 +1,30 @@
+﻿@using BookInventory.Models
+@{
+    var lowStock = ViewBag.LowStock as List<Book>;
+}
+
+<h2>Dashboard</h2>
+
+<div class="row">
+    <div class="col">📚 Total Books: <b>@ViewBag.TotalBooks</b></div>
+    <div class="col">🔢 Total Quantity: <b>@ViewBag.TotalQuantity</b></div>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col">Almirah: @ViewBag.Almirah</div>
+    <div class="col">Bed: @ViewBag.Bed</div>
+    <div class="col">Box: @ViewBag.Box</div>
+    <div class="col">Other: @ViewBag.Other</div>
+</div>
+
+<hr />
+
+<h4>⚠ Low Stock ( &lt; 5 )</h4>
+<ul>
+    @foreach (var b in lowStock)
+    {
+        <li>@b.Title — @b.TotalQuantity</li>
+    }
+</ul>

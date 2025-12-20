@@ -1,0 +1,28 @@
+﻿@model BookInventory.Models.Book
+
+<h3>Book</h3>
+
+<form method="post">
+    <input asp-for="Title" placeholder="Title" />
+    <input asp-for="Author" placeholder="Author" />
+    <input asp-for="ISBN" placeholder="ISBN" />
+    <input asp-for="ImageUrl" placeholder="Image URL" />
+
+    <hr />
+
+    <label>Almirah</label>
+    <input asp-for="Locations.Almirah" type="number" />
+
+    <label>Bed</label>
+    <input asp-for="Locations.Bed" type="number" />
+
+    <label>Box</label>
+    <input asp-for="Locations.Box" type="number" />
+
+    <label>Other Location</label>
+    <input asp-for="Locations.Other.Name" placeholder="Name" />
+    <input asp-for="Locations.Other.Quantity" type="number" />
+
+    <br /><br />
+    <button type="submit">Save</button>
+</form>

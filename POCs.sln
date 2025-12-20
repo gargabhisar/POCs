@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageToText", "ImageToText\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhatsAppAutomation", "WhatsAppAutomation\WhatsAppAutomation.csproj", "{E4BF0185-261B-4FAF-B075-7FFEC4F3F239}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory", "BookInventory\BookInventory.csproj", "{61CA2C04-B068-43E6-998D-CEA3DE4E8839}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{E4BF0185-261B-4FAF-B075-7FFEC4F3F239}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4BF0185-261B-4FAF-B075-7FFEC4F3F239}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4BF0185-261B-4FAF-B075-7FFEC4F3F239}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61CA2C04-B068-43E6-998D-CEA3DE4E8839}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61CA2C04-B068-43E6-998D-CEA3DE4E8839}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61CA2C04-B068-43E6-998D-CEA3DE4E8839}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61CA2C04-B068-43E6-998D-CEA3DE4E8839}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
