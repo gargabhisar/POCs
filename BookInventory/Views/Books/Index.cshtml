@@ -16,38 +16,105 @@
     <a href="/Books/Create">Add Book</a>
 }
 
-<table class="table table-bordered mt-3">
-    <tr>
-        <th>Title</th>
-        <th>Author</th>
-        <th>ISBN</th>
-        <th>Total</th>
-        <th>Locations</th>
-        @if (user.Role == "Admin")
-        {
-            <th>Action</th>
-        }
-    </tr>
-
-    @foreach (var b in Model)
-    {
+<table class="table table-bordered mt-3" id="booksTable">
+    <thead>
         <tr>
-            <td>@b.Title</td>
-            <td>@b.Author</td>
-            <td>@b.ISBN</td>
-            <td>@b.TotalQuantity</td>
-            <td>
-                A:@b.Locations.Almirah |
-                B:@b.Locations.Bed |
-                Box:@b.Locations.Box |
-                O:@b.Locations.Other.Quantity (@b.Locations.Other.Name)
-            </td>
+            <th onclick="sortTable(0)">Title ⬍</th>
+            <th onclick="sortTable(1)">Author ⬍</th>
+            <th onclick="sortTable(2)">ISBN ⬍</th>
+            <th onclick="sortTable(3)">Total Qty ⬍</th>
+            <th>Locations</th>
             @if (user.Role == "Admin")
             {
-                <td>
-                    <a href="/Books/Edit/@b.Id">Edit</a>
-                </td>
+                <th>Action</th>
             }
         </tr>
-    }
+    </thead>
+
+    <tbody id="booksBody">
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.Title</td>
+                <td>@b.Author</td>
+                <td>@b.ISBN</td>
+                <td>@b.TotalQuantity</td>
+                <td>
+                    A:@b.Locations.Almirah |
+                    B:@b.Locations.Bed |
+                    Box:@b.Locations.Box |
+                    O:@b.Locations.Other.Quantity
+                </td>
+                @if (user.Role == "Admin")
+                {
+                    <td>
+                        <a href="/Books/Edit/@b.Id">Edit</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
 </table>
+<nav>
+    <ul class="pagination" id="pagination"></ul>
+</nav>
+<script>
+    const rowsPerPage = 10;
+    let currentPage = 1;
+
+    const table = document.getElementById("booksTable");
+    const tbody = document.getElementById("booksBody");
+    const rows = Array.from(tbody.rows);
+    const pagination = document.getElementById("pagination");
+
+    function renderTable() {
+        tbody.innerHTML = "";
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.slice(start, end).forEach(row => tbody.appendChild(row));
+        renderPagination();
+    }
+
+    function renderPagination() {
+        pagination.innerHTML = "";
+        const pageCount = Math.ceil(rows.length / rowsPerPage);
+
+        for (let i = 1; i <= pageCount; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+
+            li.onclick = () => {
+                currentPage = i;
+                renderTable();
+            };
+
+            pagination.appendChild(li);
+        }
+    }
+
+    function sortTable(colIndex) {
+        const dir = table.getAttribute("data-sort") === "asc" ? "desc" : "asc";
+        table.setAttribute("data-sort", dir);
+
+        rows.sort((a, b) => {
+            let x = a.cells[colIndex].innerText.toLowerCase();
+            let y = b.cells[colIndex].innerText.toLowerCase();
+
+            if (!isNaN(x) && !isNaN(y)) {
+                x = Number(x);
+                y = Number(y);
+            }
+
+            return dir === "asc" ? x.localeCompare(y) : y.localeCompare(x);
+        });
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    // Initial load
+    renderTable();
+</script>
