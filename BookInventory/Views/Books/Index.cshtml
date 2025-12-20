@@ -6,9 +6,22 @@
 
 <h3>Books Inventory</h3>
 
-<form method="get">
-    <input name="search" value="@ViewBag.Search" placeholder="Search..." />
-    <button type="submit">Search</button>
+<form method="get" class="mb-3 d-flex gap-2">
+    <input name="search"
+           value="@ViewBag.Search"
+           placeholder="Search..."
+           class="form-control w-25" />
+
+    <button type="submit" class="btn btn-primary">
+        Search
+    </button>
+
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Search))
+    {
+        <a href="/Books/Index" class="btn btn-outline-secondary">
+            Clear
+        </a>
+    }
 </form>
 
 @if (user.Role == "Admin")
@@ -19,10 +32,11 @@
 <table class="table table-bordered mt-3" id="booksTable">
     <thead>
         <tr>
-            <th onclick="sortTable(0)">Title ⬍</th>
-            <th onclick="sortTable(1)">Author ⬍</th>
-            <th onclick="sortTable(2)">ISBN ⬍</th>
-            <th onclick="sortTable(3)">Total Qty ⬍</th>
+            <th>Cover</th>
+            <th onclick="sortTable(1)">Title ⬍</th>
+            <th onclick="sortTable(2)">Author ⬍</th>
+            <th onclick="sortTable(3)">ISBN ⬍</th>
+            <th onclick="sortTable(4)">Total Qty ⬍</th>
             <th>Locations</th>
             @if (user.Role == "Admin")
             {
@@ -35,15 +49,33 @@
         @foreach (var b in Model)
         {
             <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(b.ImageUrl))
+                    {
+                        <img src="@b.ImageUrl"
+                             alt="Cover"
+                             style="height:55px;width:auto;"
+                             class="border rounded"
+                             loading="lazy" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
                 <td>@b.Title</td>
                 <td>@b.Author</td>
                 <td>@b.ISBN</td>
                 <td>@b.TotalQuantity</td>
                 <td>
-                    A:@b.Locations.Almirah |
-                    B:@b.Locations.Bed |
+                    Almirah:@b.Locations.Almirah |
+                    Bed:@b.Locations.Bed |
                     Box:@b.Locations.Box |
-                    O:@b.Locations.Other.Quantity
+                    Other:@b.Locations.Other.Quantity
+                    @if (!string.IsNullOrWhiteSpace(b.Locations.Other.Name))
+                    {
+                        <span> (@b.Locations.Other.Name)</span>
+                    }
                 </td>
                 @if (user.Role == "Admin")
                 {
@@ -100,15 +132,26 @@
         table.setAttribute("data-sort", dir);
 
         rows.sort((a, b) => {
-            let x = a.cells[colIndex].innerText.toLowerCase();
-            let y = b.cells[colIndex].innerText.toLowerCase();
+            let x = a.cells[colIndex].innerText.trim();
+            let y = b.cells[colIndex].innerText.trim();
 
-            if (!isNaN(x) && !isNaN(y)) {
-                x = Number(x);
-                y = Number(y);
+            // 🔢 Numeric sorting (Total Qty column = index 4)
+            if (colIndex === 4) {
+                return dir === "asc"
+                    ? Number(x) - Number(y)
+                    : Number(y) - Number(x);
             }
 
-            return dir === "asc" ? x.localeCompare(y) : y.localeCompare(x);
+            // 📘 ISBN sorting (remove hyphens, compare as string)
+            if (colIndex === 3) {
+                x = x.replace(/-/g, "");
+                y = y.replace(/-/g, "");
+            }
+
+            // 🔤 Default string sort
+            return dir === "asc"
+                ? x.localeCompare(y)
+                : y.localeCompare(x);
         });
 
         currentPage = 1;
