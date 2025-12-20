@@ -1,7 +1,4 @@
 ﻿@using BookInventory.Models
-@{
-    var lowStock = ViewBag.LowStock as List<Book>;
-}
 
 <h2>Dashboard</h2>
 
@@ -21,10 +18,49 @@
 
 <hr />
 
-<h4>⚠ Low Stock ( &lt; 5 )</h4>
-<ul>
-    @foreach (var b in lowStock)
-    {
-        <li>@b.Title — @b.TotalQuantity</li>
-    }
-</ul>
+<div class="row mt-4">
+
+    <!-- LOW STOCK (LEFT) -->
+    <div class="col-md-6">
+        <h4 class="text-warning">⚠ Low Stock (&lt; 5)</h4>
+
+        @if (ViewBag.LowStock.Count == 0)
+        {
+            <p class="text-muted">No low stock books 🎉</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var b in ViewBag.LowStock)
+                {
+                    <li>
+                        <strong>@b.Title</strong> — @b.TotalQuantity
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    <!-- OUT OF STOCK (RIGHT) -->
+    <div class="col-md-6">
+        <h4 class="text-danger">🚫 Out of Stock (0)</h4>
+
+        @if (ViewBag.OutOfStock.Count == 0)
+        {
+            <p class="text-muted">No books are out of stock 🎉</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var b in ViewBag.OutOfStock)
+                {
+                    <li>
+                        <strong>@b.Title</strong> — @b.TotalQuantity
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+</div>
+

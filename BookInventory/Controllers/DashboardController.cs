@@ -26,6 +26,7 @@ namespace BookInventory.Controllers
             ViewBag.Box = _service.BoxCount();
             ViewBag.Other = _service.OtherCount();
             ViewBag.LowStock = _service.LowStock();
+            ViewBag.OutOfStock = _service.OutOfStockCount();
 
             return View();
         }
