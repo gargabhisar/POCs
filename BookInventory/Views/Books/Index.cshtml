@@ -60,21 +60,23 @@
 <table class="table table-bordered mt-3" id="booksTable">
     <thead>
         <tr>
+            <th>SerialNo</th>
+
             <th>Cover</th>
 
-            <th onclick="sortTable(1)">
+            <th onclick="sortTable(2)">
                 Title <span id="sort-title">▲</span>
             </th>
 
-            <th onclick="sortTable(2)">
+            <th onclick="sortTable(3)">
                 Author <span id="sort-author"></span>
             </th>
 
-            <th onclick="sortTable(3)">
+            <th onclick="sortTable(4)">
                 ISBN <span id="sort-isbn"></span>
             </th>
 
-            <th onclick="sortTable(4)">
+            <th onclick="sortTable(5)">
                 Total Qty <span id="sort-qty"></span>
             </th>
 
@@ -92,6 +94,7 @@
         @foreach (var b in Model)
         {
             <tr>
+                <td>@b.SerialNo</td>
                 <td>
                     @if (!string.IsNullOrEmpty(b.ImageUrl))
                     {
@@ -251,20 +254,20 @@
         clearIcons();
 
         const icon = dir === "asc" ? "▲" : "▼";
-        if (colIndex === 1) document.getElementById("sort-title").innerText = icon;
-        if (colIndex === 2) document.getElementById("sort-author").innerText = icon;
-        if (colIndex === 3) document.getElementById("sort-isbn").innerText = icon;
-        if (colIndex === 4) document.getElementById("sort-qty").innerText = icon;
+        if (colIndex === 2) document.getElementById("sort-title").innerText = icon;
+        if (colIndex === 3) document.getElementById("sort-author").innerText = icon;
+        if (colIndex === 4) document.getElementById("sort-isbn").innerText = icon;
+        if (colIndex === 5) document.getElementById("sort-qty").innerText = icon;
 
         rows.sort((a, b) => {
             let x = a.cells[colIndex].innerText.trim();
             let y = b.cells[colIndex].innerText.trim();
 
-            if (colIndex === 4) {
+            if (colIndex === 5) {
                 return dir === "asc" ? Number(x) - Number(y) : Number(y) - Number(x);
             }
 
-            if (colIndex === 3) {
+            if (colIndex === 4) {
                 x = x.replace(/-/g, "");
                 y = y.replace(/-/g, "");
             }
@@ -308,7 +311,7 @@
 
     table.setAttribute("data-sort", "desc"); // force ASC
     rows = [...originalRows];
-    sortTable(1); // Title
+    sortTable(2); // Title
 
     isInitialLoad = false;
 </script>
