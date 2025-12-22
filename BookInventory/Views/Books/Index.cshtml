@@ -22,6 +22,12 @@
             Clear
         </a>
     }
+
+    <button type="button"
+            class="btn btn-outline-secondary"
+            onclick="clearSorting()">
+        Clear Sort
+    </button>
 </form>
 
 @if (user.Role == "Admin")
@@ -33,17 +39,32 @@
     <thead>
         <tr>
             <th>Cover</th>
-            <th onclick="sortTable(1)">Title ⬍</th>
-            <th onclick="sortTable(2)">Author ⬍</th>
-            <th onclick="sortTable(3)">ISBN ⬍</th>
-            <th onclick="sortTable(4)">Total Qty ⬍</th>
+
+            <th onclick="sortTable(1)">
+                Title <span id="sort-title">▲</span>
+            </th>
+
+            <th onclick="sortTable(2)">
+                Author <span id="sort-author"></span>
+            </th>
+
+            <th onclick="sortTable(3)">
+                ISBN <span id="sort-isbn"></span>
+            </th>
+
+            <th onclick="sortTable(4)">
+                Total Qty <span id="sort-qty"></span>
+            </th>
+
             <th>Locations</th>
+
             @if (user.Role == "Admin")
             {
                 <th>Action</th>
             }
         </tr>
     </thead>
+
 
     <tbody id="booksBody">
         @foreach (var b in Model)
@@ -96,8 +117,26 @@
 
     const table = document.getElementById("booksTable");
     const tbody = document.getElementById("booksBody");
-    const rows = Array.from(tbody.rows);
+    const originalRows = Array.from(tbody.rows); // server order
+    let rows = [...originalRows];
     const pagination = document.getElementById("pagination");
+
+    function clearSorting() {
+        // Clear icons
+        clearIcons();
+
+        // Reset working rows to original server order
+        rows = [...originalRows];
+
+        // Remove sort direction
+        table.removeAttribute("data-sort");
+
+        // Reset pagination
+        currentPage = 1;
+
+        // Re-render table
+        renderTable();
+    }
 
     function renderTable() {
         tbody.innerHTML = "";
@@ -127,28 +166,40 @@
         }
     }
 
+    function clearIcons() {
+        document.getElementById("sort-title").innerText = "";
+        document.getElementById("sort-author").innerText = "";
+        document.getElementById("sort-isbn").innerText = "";
+        document.getElementById("sort-qty").innerText = "";
+    }
+
     function sortTable(colIndex) {
+        rows = [...rows]; // work on copy
+
         const dir = table.getAttribute("data-sort") === "asc" ? "desc" : "asc";
         table.setAttribute("data-sort", dir);
+
+        clearIcons();
+
+        let icon = dir === "asc" ? "▲" : "▼";
+        if (colIndex === 1) document.getElementById("sort-title").innerText = icon;
+        if (colIndex === 2) document.getElementById("sort-author").innerText = icon;
+        if (colIndex === 3) document.getElementById("sort-isbn").innerText = icon;
+        if (colIndex === 4) document.getElementById("sort-qty").innerText = icon;
 
         rows.sort((a, b) => {
             let x = a.cells[colIndex].innerText.trim();
             let y = b.cells[colIndex].innerText.trim();
 
-            // 🔢 Numeric sorting (Total Qty column = index 4)
             if (colIndex === 4) {
-                return dir === "asc"
-                    ? Number(x) - Number(y)
-                    : Number(y) - Number(x);
+                return dir === "asc" ? Number(x) - Number(y) : Number(y) - Number(x);
             }
 
-            // 📘 ISBN sorting (remove hyphens, compare as string)
             if (colIndex === 3) {
                 x = x.replace(/-/g, "");
                 y = y.replace(/-/g, "");
             }
 
-            // 🔤 Default string sort
             return dir === "asc"
                 ? x.localeCompare(y)
                 : y.localeCompare(x);
@@ -158,6 +209,8 @@
         renderTable();
     }
 
-    // Initial load
-    renderTable();
+    // Initial load: default Title sort, but keep originalRows intact
+    table.setAttribute("data-sort", "desc"); // force ASC on first call
+    rows = [...originalRows];               // ensure working copy
+    sortTable(1);
 </script>
