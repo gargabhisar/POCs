@@ -108,6 +108,7 @@
         }
     </tbody>
 </table>
+<div class="text-muted mb-2" id="paginationInfo"></div>
 <nav>
     <ul class="pagination" id="pagination"></ul>
 </nav>
@@ -141,12 +142,22 @@
     function renderTable() {
         tbody.innerHTML = "";
 
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
+        const totalRows = rows.length;
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
 
-        rows.slice(start, end).forEach(row => tbody.appendChild(row));
+        rows.slice(startIndex, endIndex).forEach(row => tbody.appendChild(row));
         renderPagination();
+
+        // 🔢 Pagination count text
+        if (totalRows === 0) {
+            document.getElementById("paginationInfo").innerText = "No records found";
+        } else {
+            document.getElementById("paginationInfo").innerText =
+                `Showing ${startIndex + 1}–${endIndex} of ${totalRows} books`;
+        }
     }
+
 
     function renderPagination() {
         pagination.innerHTML = "";
