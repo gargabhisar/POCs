@@ -45,5 +45,10 @@ namespace BookInventory.Services
                  + book.Locations.Box
                  + otherQty;
         }
+
+        public int GetNextSerialNo()
+        {
+            return _repo.GetNextSerialNo();
+        }
     }
 }

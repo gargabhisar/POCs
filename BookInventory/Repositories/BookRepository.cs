@@ -39,5 +39,16 @@ namespace BookInventory.Repositories
 
             return _books.Find(filter).ToList();
         }
+
+        public int GetNextSerialNo()
+        {
+            var lastBook = _books
+                .Find(_ => true)
+                .SortByDescending(b => b.SerialNo)
+                .Limit(1)
+                .FirstOrDefault();
+
+            return lastBook == null ? 1 : lastBook.SerialNo + 1;
+        }
     }
 }

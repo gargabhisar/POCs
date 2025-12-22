@@ -32,6 +32,7 @@ namespace BookInventory.Controllers
         {
             return View(new Book
             {
+                SerialNo = _service.GetNextSerialNo(), // ✅ auto-generate
                 Locations = new BookLocations
                 {
                     Other = new OtherLocation()
@@ -45,6 +46,9 @@ namespace BookInventory.Controllers
         {
             if (!ValidateBook(book))
                 return View(book);
+
+            // 🔒 Enforce backend-generated SerialNo
+            book.SerialNo = _service.GetNextSerialNo();
 
             _service.Save(book);
             return RedirectToAction("Index");
@@ -67,6 +71,13 @@ namespace BookInventory.Controllers
         {
             if (!ValidateBook(book))
                 return View(book);
+
+            // 🔒 Preserve original SerialNo
+            var existing = _service.Get(book.Id.ToString());
+            if (existing == null)
+                return NotFound();
+
+            book.SerialNo = existing.SerialNo;
 
             _service.Save(book);
             return RedirectToAction("Index");

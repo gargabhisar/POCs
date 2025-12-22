@@ -3,6 +3,13 @@
 <h3>Book</h3>
 
 <form method="post">
+
+    <!-- ✅ Serial No (auto-generated, read-only) -->
+    <label>Serial No</label>
+    <input asp-for="SerialNo" type="number" readonly />
+
+    <br /><br />
+
     <input asp-for="Title" placeholder="Title" />
     <input asp-for="Author" placeholder="Author" />
     <input asp-for="ISBN" placeholder="ISBN" />
