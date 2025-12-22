@@ -123,7 +123,10 @@
                 @if (user.Role == "Admin")
                 {
                     <td>
-                        <a href="/Books/Edit/@b.Id">Edit</a>
+                        <a href="/Books/Edit/@b.Id"
+                           onclick="saveCurrentPage()">
+                            Edit
+                        </a>
                     </td>
                 }
             </tr>
@@ -133,72 +136,86 @@
 <script>
     let rowsPerPage = 10;
     let currentPage = 1;
+    let isInitialLoad = true;
 
     const PAGE_SIZE_KEY = "books_page_size";
+    const CURRENT_PAGE_KEY = "books_current_page";
 
     const table = document.getElementById("booksTable");
     const tbody = document.getElementById("booksBody");
-    const originalRows = Array.from(tbody.rows); // server order
-    let rows = [...originalRows];
     const pagination = document.getElementById("pagination");
 
+    const originalRows = Array.from(tbody.rows); // server order
+    let rows = [...originalRows];
+
+    /* =========================
+       STATE HELPERS
+    ========================= */
+
+    function saveCurrentPage() {
+        localStorage.setItem(CURRENT_PAGE_KEY, currentPage);
+    }
+
     function clearSorting() {
-        // Clear icons
         clearIcons();
-
-        // Reset working rows to original server order
         rows = [...originalRows];
-
-        // Remove sort direction
         table.removeAttribute("data-sort");
-
-        // Reset pagination
         currentPage = 1;
-
-        // Re-render table
         renderTable();
     }
+
+    /* =========================
+       PAGE SIZE
+    ========================= */
 
     function changePageSize() {
         const select = document.getElementById("pageSizeSelect");
         const value = select.value;
 
-        // Save selection
         localStorage.setItem(PAGE_SIZE_KEY, value);
 
-        if (value === "all") {
-            rowsPerPage = rows.length;
-        } else {
-            rowsPerPage = parseInt(value);
-        }
+        rowsPerPage = value === "all"
+            ? rows.length
+            : parseInt(value);
 
         currentPage = 1;
         renderTable();
     }
 
+    /* =========================
+       RENDERING
+    ========================= */
+
     function renderTable() {
         tbody.innerHTML = "";
 
         const totalRows = rows.length;
+        const maxPage = Math.ceil(totalRows / rowsPerPage) || 1;
+
+        if (currentPage > maxPage) {
+            currentPage = maxPage;
+        }
+
         const startIndex = (currentPage - 1) * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
 
-        rows.slice(startIndex, endIndex).forEach(row => tbody.appendChild(row));
+        rows.slice(startIndex, endIndex)
+            .forEach(row => tbody.appendChild(row));
+
         renderPagination();
 
-        // 🔢 Pagination count text
-        if (totalRows === 0) {
-            document.getElementById("paginationInfo").innerText = "No records found";
-        } else {
-            document.getElementById("paginationInfo").innerText =
-                `Showing ${startIndex + 1}–${endIndex} of ${totalRows} books`;
-        }
+        const info = document.getElementById("paginationInfo");
+        info.innerText = totalRows === 0
+            ? "No records found"
+            : `Showing ${startIndex + 1}–${endIndex} of ${totalRows} books`;
     }
-
 
     function renderPagination() {
         pagination.innerHTML = "";
-        const pageCount = rowsPerPage >= rows.length ? 1 : Math.ceil(rows.length / rowsPerPage);
+
+        const pageCount = rowsPerPage >= rows.length
+            ? 1
+            : Math.ceil(rows.length / rowsPerPage);
 
         for (let i = 1; i <= pageCount; i++) {
             const li = document.createElement("li");
@@ -214,6 +231,10 @@
         }
     }
 
+    /* =========================
+       SORTING
+    ========================= */
+
     function clearIcons() {
         document.getElementById("sort-title").innerText = "";
         document.getElementById("sort-author").innerText = "";
@@ -222,14 +243,14 @@
     }
 
     function sortTable(colIndex) {
-        rows = [...rows]; // work on copy
+        rows = [...rows];
 
         const dir = table.getAttribute("data-sort") === "asc" ? "desc" : "asc";
         table.setAttribute("data-sort", dir);
 
         clearIcons();
 
-        let icon = dir === "asc" ? "▲" : "▼";
+        const icon = dir === "asc" ? "▲" : "▼";
         if (colIndex === 1) document.getElementById("sort-title").innerText = icon;
         if (colIndex === 2) document.getElementById("sort-author").innerText = icon;
         if (colIndex === 3) document.getElementById("sort-isbn").innerText = icon;
@@ -253,26 +274,41 @@
                 : y.localeCompare(x);
         });
 
-        currentPage = 1;
+        if (!isInitialLoad) {
+            currentPage = 1;
+        }
+
         renderTable();
     }
 
-    // 🔁 Restore page size from localStorage
+    /* =========================
+       RESTORE STATE
+    ========================= */
+
+    // Restore page size
     const savedPageSize = localStorage.getItem(PAGE_SIZE_KEY);
     const pageSizeSelect = document.getElementById("pageSizeSelect");
 
     if (savedPageSize) {
         pageSizeSelect.value = savedPageSize;
-
-        if (savedPageSize === "all") {
-            rowsPerPage = rows.length;
-        } else {
-            rowsPerPage = parseInt(savedPageSize);
-        }
+        rowsPerPage = savedPageSize === "all"
+            ? rows.length
+            : parseInt(savedPageSize);
     }
 
-    // Initial load: default Title sort, but keep originalRows intact
-    table.setAttribute("data-sort", "desc"); // force ASC on first call
-    rows = [...originalRows];               // ensure working copy
-    sortTable(1);
+    // Restore page number
+    const savedPage = localStorage.getItem(CURRENT_PAGE_KEY);
+    if (savedPage) {
+        currentPage = parseInt(savedPage);
+    }
+
+    /* =========================
+       INITIAL LOAD
+    ========================= */
+
+    table.setAttribute("data-sort", "desc"); // force ASC
+    rows = [...originalRows];
+    sortTable(1); // Title
+
+    isInitialLoad = false;
 </script>
