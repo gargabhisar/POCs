@@ -28,6 +28,16 @@
             onclick="clearSorting()">
         Clear Sort
     </button>
+
+    <select id="locationFilter"
+            class="form-select d-inline-block w-auto ms-2"
+            onchange="applyLocationFilter()">
+        <option value="all">All Locations</option>
+        <option value="almirah">Almirah</option>
+        <option value="bed">Bed</option>
+        <option value="box">Box</option>
+        <option value="other">Other</option>
+    </select>
 </form>
 
 @if (user.Role == "Admin")
@@ -93,7 +103,10 @@
     <tbody id="booksBody">
         @foreach (var b in Model)
         {
-            <tr>
+            <tr data-almirah="@b.Locations.Almirah"
+                data-bed="@b.Locations.Bed"
+                data-box="@b.Locations.Box"
+                data-other="@b.Locations.Other.Quantity">
                 <td>@b.SerialNo</td>
                 <td>
                     @if (!string.IsNullOrEmpty(b.ImageUrl))
@@ -303,6 +316,26 @@
     const savedPage = localStorage.getItem(CURRENT_PAGE_KEY);
     if (savedPage) {
         currentPage = parseInt(savedPage);
+    }
+
+    /* =========================
+       LOCATION BASED FILTER
+    ========================= */
+    function applyLocationFilter() {
+        const filter = document.getElementById("locationFilter").value;
+
+        // Always start from original server order
+        rows = [...originalRows];
+
+        if (filter !== "all") {
+            rows = rows.filter(row => {
+                const qty = parseInt(row.dataset[filter] || "0");
+                return qty > 0;
+            });
+        }
+
+        currentPage = 1;
+        renderTable();
     }
 
     /* =========================
