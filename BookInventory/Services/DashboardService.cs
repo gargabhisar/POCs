@@ -32,9 +32,9 @@ namespace BookInventory.Services
             => _books.AsQueryable().Sum(b => b.Locations.Other.Quantity);
 
         public List<Book> LowStock()
-            => _books.Find(b => b.TotalQuantity > 0 && b.TotalQuantity < 4).ToList();
+            => _books.Find(b => b.TotalQuantity > 0 && b.TotalQuantity < 4).SortBy(b => b.Title).ToList();
 
         public List<Book> OutOfStockCount()
-            => _books.Find(b => b.TotalQuantity == 0).ToList();
+            => _books.Find(b => b.TotalQuantity == 0).SortBy(b => b.Title).ToList();
     }
 }
