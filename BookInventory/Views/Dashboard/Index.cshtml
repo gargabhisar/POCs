@@ -22,7 +22,7 @@
 
     <!-- LOW STOCK (LEFT) -->
     <div class="col-md-6">
-        <h4 class="text-warning">⚠ Low Stock (&lt; 5)</h4>
+        <h4 class="text-warning">⚠ Low Stock (&lt; 5) (Count : @ViewBag.LowStockCount)</h4>
 
         @if (ViewBag.LowStock.Count == 0)
         {
@@ -43,7 +43,7 @@
 
     <!-- OUT OF STOCK (RIGHT) -->
     <div class="col-md-6">
-        <h4 class="text-danger">🚫 Out of Stock (0)</h4>
+        <h4 class="text-danger">🚫 Out of Stock (0) (Count : @ViewBag.OutOfStockCount)</h4>
 
         @if (ViewBag.OutOfStock.Count == 0)
         {

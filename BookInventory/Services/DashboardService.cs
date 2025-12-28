@@ -34,7 +34,13 @@ namespace BookInventory.Services
         public List<Book> LowStock()
             => _books.Find(b => b.TotalQuantity > 0 && b.TotalQuantity < 4).SortBy(b => b.Title).ToList();
 
-        public List<Book> OutOfStockCount()
+        public List<Book> OutOfStock()
             => _books.Find(b => b.TotalQuantity == 0).SortBy(b => b.Title).ToList();
+
+        public int LowStockCount()
+            => _books.Find(b => b.TotalQuantity > 0 && b.TotalQuantity < 4).SortBy(b => b.Title).ToList().Count;
+
+        public int OutOfStockCount()
+            => _books.Find(b => b.TotalQuantity == 0).SortBy(b => b.Title).ToList().Count;
     }
 }
