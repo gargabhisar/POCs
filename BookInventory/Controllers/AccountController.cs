@@ -16,6 +16,14 @@ namespace BookInventory.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            var user = SessionHelper.GetUser(HttpContext);
+
+            if (user != null)
+            {
+                // Already logged in → go to dashboard
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             return View();
         }
 
@@ -43,8 +51,8 @@ namespace BookInventory.Controllers
 
         public IActionResult Logout()
         {
-            SessionHelper.Logout(HttpContext);
-            return RedirectToAction("Login");
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "Account");
         }
     }
 }

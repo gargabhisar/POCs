@@ -10,7 +10,7 @@ builder.Services.AddControllersWithViews();
 // Session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(2);
+    options.IdleTimeout = TimeSpan.FromHours(24); // ✅ 24 hours
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
