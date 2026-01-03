@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35327.3
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerateQRCode", "GenerateQRCode\GenerateQRCode.csproj", "{BE3D0F98-CF35-4F7F-9AE1-D68F94F505C6}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhatsAppAutomation", "WhatsAppAutomation\WhatsAppAutomation.csproj", "{E4BF0185-261B-4FAF-B075-7FFEC4F3F239}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInventory", "BookInventory\BookInventory.csproj", "{61CA2C04-B068-43E6-998D-CEA3DE4E8839}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeGenerator", "QRCodeGenerator\QRCodeGenerator.csproj", "{151244B2-12AC-42F2-98FA-1B8A168CF34E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{61CA2C04-B068-43E6-998D-CEA3DE4E8839}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61CA2C04-B068-43E6-998D-CEA3DE4E8839}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61CA2C04-B068-43E6-998D-CEA3DE4E8839}.Release|Any CPU.Build.0 = Release|Any CPU
+		{151244B2-12AC-42F2-98FA-1B8A168CF34E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{151244B2-12AC-42F2-98FA-1B8A168CF34E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{151244B2-12AC-42F2-98FA-1B8A168CF34E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{151244B2-12AC-42F2-98FA-1B8A168CF34E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
