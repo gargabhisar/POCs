@@ -82,21 +82,28 @@ namespace BookInventory.Controllers
 
             var fileName = $"{invoice.CustomerMobile}_{safeName}_{datePart}_INV-{invoice.InvoiceNo:D4}.pdf";
 
-            var folderPath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                "Invoices"
-            );
-
-            if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
-
-            var filePath = Path.Combine(folderPath, fileName);
-
-            System.IO.File.WriteAllBytes(filePath, pdfBytes);
+            // 🔐 Store in Session
+            HttpContext.Session.Set("LastInvoicePdf", pdfBytes);
+            HttpContext.Session.SetString("LastInvoiceFileName", fileName);
 
             TempData["Success"] = "Invoice generated successfully.";
-            return RedirectToAction("Create", "Billing");
+
+            // 🔑 IMPORTANT
+            return RedirectToAction("Create", new { download = 1 });
+        }
+
+        public IActionResult DownloadLastInvoice()
+        {
+            var pdf = HttpContext.Session.Get("LastInvoicePdf");
+            var fileName = HttpContext.Session.GetString("LastInvoiceFileName");
+
+            if (pdf == null || fileName == null)
+                return NotFound();
+
+            HttpContext.Session.Remove("LastInvoicePdf");
+            HttpContext.Session.Remove("LastInvoiceFileName");
+
+            return File(pdf, "application/pdf", fileName);
         }
 
         [AuthorizeRole("Admin")]

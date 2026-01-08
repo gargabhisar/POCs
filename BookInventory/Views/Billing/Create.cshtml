@@ -4,8 +4,9 @@
 }
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
         @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 <div class="container mt-4">
@@ -158,5 +159,16 @@
             document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
         }
     </script>
+}
 
+@if (Context.Request.Query["download"] == "1")
+{
+    <script>
+        window.addEventListener("load", function () {
+            // Delay ensures session is fully available
+            setTimeout(function () {
+                window.location.href = '@Url.Action("DownloadLastInvoice", "Billing")';
+            }, 300);
+        });
+    </script>
 }
