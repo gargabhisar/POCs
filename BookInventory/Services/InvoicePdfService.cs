@@ -1,6 +1,7 @@
 ﻿using BookInventory.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace BookInventory.Services
 {
@@ -25,6 +26,12 @@ namespace BookInventory.Services
                 (i.MRP * i.DiscountPercent / 100) * i.Quantity
             );
 
+            var logoPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "inkquills-logo.png"
+            );
+
             return Document.Create(container =>
             {
                 container.Page(page =>
@@ -42,7 +49,7 @@ namespace BookInventory.Services
                             {
                                 r.ConstantItem(120)
                                     .AlignMiddle()
-                                    .Image("wwwroot/inkquills-logo.png")
+                                    .Image(logoPath)
                                     .FitWidth();
                             });
 
@@ -62,15 +69,13 @@ namespace BookInventory.Services
                             row.RelativeItem().Column(c =>
                             {
                                 c.Item().Text("Invoice To:").Bold();
-                                c.Item().Text("");
-                                c.Item().Text($"Name: { invoice.CustomerName}");
+                                c.Item().Text($"Name: {invoice.CustomerName}");
                                 c.Item().Text($"Mobile No: {invoice.CustomerMobile}");
                             });
 
                             row.ConstantItem(200).AlignRight().Column(c =>
                             {
                                 c.Item().Text($"Invoice No: {invoice.InvoiceNo}");
-                                c.Item().Text("");
                                 c.Item().Text($"Date: {invoice.InvoiceDate:dd-MM-yyyy}");
                             });
                         });
@@ -119,10 +124,12 @@ namespace BookInventory.Services
                         {
                             row.RelativeItem().Column(c =>
                             {
-                                c.Item().PaddingTop(30).Text("Authorized Signatory").Bold();
+                                c.Item().PaddingTop(30)
+                                    .Text("Authorized Signatory")
+                                    .Bold();
                             });
 
-                            row.ConstantItem(200).Column(c =>
+                            row.ConstantItem(200).AlignRight().Column(c =>
                             {
                                 c.Item().Text($"Sub Total: ₹ {subTotal:0.00}");
                                 c.Item().Text($"Discount: ₹ {totalDiscount:0.00}");
