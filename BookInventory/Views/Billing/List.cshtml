@@ -2,7 +2,7 @@
 
 <h3>Invoices</h3>
 
-<div class="row mb-3">
+<div class="row mb-3 align-items-center">
     <div class="col-md-4">
         <input type="text"
                id="invoiceSearch"
@@ -10,6 +10,19 @@
                placeholder="Search by Invoice No, Name or Mobile"
                onkeyup="filterInvoices()" />
     </div>
+
+    <div class="col-md-auto">
+        <select id="pageSizeSelect"
+                class="form-select"
+                onchange="changePageSize()">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+        </select>
+    </div>
+
+    <div class="col-md-auto text-muted" id="paginationInfo"></div>
 </div>
 
 <table class="table table-bordered table-hover" id="invoiceTable">
@@ -44,6 +57,10 @@
     </tbody>
 </table>
 
+<nav>
+    <ul class="pagination" id="pagination"></ul>
+</nav>
+
 <div id="noResults"
      class="text-center text-muted mt-3"
      style="display:none;">
@@ -51,37 +68,88 @@
 </div>
 
 <script>
-    function filterInvoices() {
-        const input = document.getElementById("invoiceSearch");
-        const filter = input.value.toLowerCase();
+    let rowsPerPage = 10;
+    let currentPage = 1;
 
-        const table = document.getElementById("invoiceTable");
-        const rows = table.getElementsByTagName("tr");
+    const tableBody = document.getElementById("invoiceTableBody");
+    const allRows = Array.from(tableBody.rows);
+    let filteredRows = [...allRows];
 
-        let visibleCount = 0;
+    const pagination = document.getElementById("pagination");
+    const paginationInfo = document.getElementById("paginationInfo");
 
-        // Skip header row (i = 1)
-        for (let i = 1; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName("td");
-            if (!cells.length) continue;
+    function renderTable() {
+        tableBody.innerHTML = "";
 
-            const invoiceNo = cells[0].innerText.toLowerCase();
-            const customer  = cells[2].innerText.toLowerCase();
-            const mobile    = cells[3].innerText.toLowerCase();
+        const totalRows = filteredRows.length;
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = rowsPerPage === Infinity ? totalRows : start + rowsPerPage;
 
-            if (
-                invoiceNo.includes(filter) ||
-                customer.includes(filter) ||
-                mobile.includes(filter)
-            ) {
-                rows[i].style.display = "";
-                visibleCount++;
-            } else {
-                rows[i].style.display = "none";
-            }
+        filteredRows.slice(start, end).forEach(r => tableBody.appendChild(r));
+
+        renderPagination();
+        renderInfo(start, end, totalRows);
+    }
+
+    function renderPagination() {
+        pagination.innerHTML = "";
+
+        if (rowsPerPage === Infinity) return;
+
+        const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+        if (pageCount <= 1) return;
+
+        for (let i = 1; i <= pageCount; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+
+            li.onclick = () => {
+                currentPage = i;
+                renderTable();
+            };
+
+            pagination.appendChild(li);
+        }
+    }
+
+    function renderInfo(start, end, total) {
+        if (total === 0) {
+            paginationInfo.innerText = "No records";
+            return;
         }
 
-        document.getElementById("noResults").style.display =
-            visibleCount === 0 ? "block" : "none";
+        paginationInfo.innerText =
+            `Showing ${start + 1}–${Math.min(end, total)} of ${total} invoices`;
     }
+
+    function filterInvoices() {
+        const term = document.getElementById("invoiceSearch")
+            .value.toLowerCase();
+
+        filteredRows = allRows.filter(row => {
+            const cells = row.cells;
+            return (
+                cells[0].innerText.toLowerCase().includes(term) || // Invoice
+                cells[2].innerText.toLowerCase().includes(term) || // Name
+                cells[3].innerText.toLowerCase().includes(term)    // Mobile
+            );
+        });
+
+        document.getElementById("noResults").style.display =
+            filteredRows.length === 0 ? "block" : "none";
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    function changePageSize() {
+        const value = document.getElementById("pageSizeSelect").value;
+        rowsPerPage = value === "all" ? Infinity : parseInt(value);
+        currentPage = 1;
+        renderTable();
+    }
+
+    // INITIAL LOAD
+    renderTable();
 </script>
