@@ -32,6 +32,12 @@ namespace BookInventory.Services
                 "inkquills-logo.png"
             );
 
+            var signaturePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "signature.png"
+            );
+
             return Document.Create(container =>
             {
                 container.Page(page =>
@@ -124,7 +130,17 @@ namespace BookInventory.Services
                         {
                             row.RelativeItem().Column(c =>
                             {
-                                c.Item().PaddingTop(30)
+                                c.Item().PaddingTop(20);
+
+                                if (File.Exists(signaturePath))
+                                {
+                                    c.Item()
+                                        .Width(120)
+                                        .Image(signaturePath)
+                                        .FitWidth();
+                                }
+
+                                c.Item().PaddingTop(5)
                                     .Text("Authorized Signatory")
                                     .Bold();
                             });
