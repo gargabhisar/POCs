@@ -25,7 +25,7 @@ namespace BookInventory.Services
             book.TotalQuantity = CalculateTotal(book);
             book.UpdatedAt = DateTime.Now;
 
-            if (book.Id == ObjectId.Empty)
+            if (string.IsNullOrEmpty(book.Id))
             {
                 book.CreatedAt = DateTime.Now;
                 _repo.Insert(book);

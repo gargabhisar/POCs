@@ -6,7 +6,8 @@ namespace BookInventory.Models
     public class Book
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }   // ✅ STRING
         public int SerialNo { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
@@ -15,6 +16,9 @@ namespace BookInventory.Models
 
         public int TotalQuantity { get; set; }
         public BookLocations Locations { get; set; }
+
+        public decimal MRP { get; set; }  
+        public decimal DiscountPercent { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

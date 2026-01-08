@@ -55,6 +55,16 @@
                                    asp-controller="Export"
                                    asp-action="Books">Export</a>
                             </li>
+                            @if (user != null && user.Role == "Admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       asp-controller="Billing"
+                                       asp-action="Create">
+                                        Billing
+                                    </a>
+                                </li>
+                            }
                         }
                     </ul>
 

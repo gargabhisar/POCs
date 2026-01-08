@@ -1,8 +1,11 @@
 ﻿using BookInventory.Data;
 using BookInventory.Repositories;
 using BookInventory.Services;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -18,11 +21,15 @@ builder.Services.AddSession(options =>
 // MongoDB
 builder.Services.AddSingleton<MongoContext>();
 
+builder.Services.AddScoped<CounterRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<BookRepository>();
 builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<InvoiceRepository>();
+builder.Services.AddScoped<InvoicePdfService>();
 
 var app = builder.Build();
 

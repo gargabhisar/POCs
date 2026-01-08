@@ -18,7 +18,7 @@ namespace BookInventory.Repositories
             => _books.Find(_ => true).ToList();
 
         public Book GetById(string id)
-            => _books.Find(x => x.Id == ObjectId.Parse(id)).FirstOrDefault();
+            => _books.Find(x => x.Id == id).FirstOrDefault();
 
         public void Insert(Book book)
             => _books.InsertOne(book);
