@@ -26,17 +26,8 @@ namespace BookInventory.Services
                 (i.MRP * i.DiscountPercent / 100) * i.Quantity
             );
 
-            var logoPath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                "inkquills-logo.png"
-            );
-
-            var signaturePath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                "signature.png"
-            );
+            var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "inkquills-logo.png");
+            var signaturePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "signature.png");
 
             return Document.Create(container =>
             {
@@ -44,125 +35,167 @@ namespace BookInventory.Services
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(20);
+                    page.Background(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(11));
 
                     page.Content().Column(col =>
                     {
                         // ================= HEADER =================
-                        col.Item().Row(row =>
-                        {
-                            row.RelativeItem().Row(r =>
-                            {
-                                r.ConstantItem(120)
-                                    .AlignMiddle()
-                                    .Image(logoPath)
-                                    .FitWidth();
-                            });
+                        col.Item()
+                           .Border(1)
+                           .BorderColor(Colors.Grey.Lighten2)
+                           .Background(Colors.White)
+                           .Padding(10)
+                           .Row(row =>
+                           {
+                               row.RelativeItem().Row(r =>
+                               {
+                                   r.ConstantItem(120)
+                                       .AlignMiddle()
+                                       .Image(logoPath)
+                                       .FitWidth();
+                               });
 
-                            row.ConstantItem(200).AlignRight().Column(c =>
-                            {
-                                c.Item().Text("Invoice").FontSize(20).Bold();
-                                c.Item().Text($"GSTIN: {GSTIN}");
-                                c.Item().Text($"PAN: {PAN}");
-                            });
+                               row.ConstantItem(200).AlignRight().Column(c =>
+                               {
+                                   c.Item().Text("TAX INVOICE")
+                                       .FontSize(16)
+                                       .Bold()
+                                       .FontColor(Colors.Blue.Darken2);
+
+                                   c.Item().Text($"GSTIN: {GSTIN}");
+                                   c.Item().Text($"PAN: {PAN}");
+                               });
+                           });
+
+                        // ================= CUSTOMER + INVOICE =================
+                        col.Item().PaddingTop(10).Row(row =>
+                        {
+                            row.RelativeItem()
+                               .Border(1)
+                               .BorderColor(Colors.Grey.Lighten2)
+                               .Background(Colors.White)
+                               .Padding(10)
+                               .Column(c =>
+                               {
+                                   c.Item().Text("Invoice To:\n").Bold();
+                                   c.Item().Text($"Name: {invoice.CustomerName}");
+                                   c.Item().Text($"Mobile No: {invoice.CustomerMobile}");
+                               });
+
+                            row.ConstantItem(220)
+                               .Border(1)
+                               .BorderColor(Colors.Grey.Lighten2)
+                               .Background(Colors.White)
+                               .Padding(10)
+                               .Column(c =>
+                               {
+                                   c.Item().Text($"Invoice No: INV-NDBF-{invoice.InvoiceNo:D4}").Bold();
+                                   c.Item().Text($"Date: {invoice.InvoiceDate:dd-MM-yyyy}");
+                               });
                         });
 
-                        col.Item().PaddingVertical(10).LineHorizontal(1);
+                        // ================= ITEMS TABLE =================
+                        col.Item().PaddingTop(10)
+                           .Border(1)
+                           .BorderColor(Colors.Grey.Lighten2)
+                           .Background(Colors.White)
+                           .Padding(5)
+                           .Table(table =>
+                           {
+                               table.ColumnsDefinition(columns =>
+                               {
+                                   columns.ConstantColumn(30);
+                                   columns.RelativeColumn(4);
+                                   columns.RelativeColumn(1);
+                                   columns.RelativeColumn(1);
+                                   columns.RelativeColumn(1);
+                                   columns.RelativeColumn(1);
+                               });
 
-                        // ================= CUSTOMER =================
-                        col.Item().Row(row =>
+                               table.Header(header =>
+                               {
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("#").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Item").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("MRP").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Qty").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Disc %").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Total").Bold();
+                               });
+
+                               int i = 1;
+                               foreach (var item in invoice.Items)
+                               {
+                                   table.Cell().Padding(5).Text(i++.ToString());
+                                   table.Cell().Padding(5).Text(item.Title);
+                                   table.Cell().Padding(5).Text(item.MRP.ToString("0.00"));
+                                   table.Cell().Padding(5).Text(item.Quantity.ToString());
+                                   table.Cell().Padding(5).Text($"{item.DiscountPercent:0.#}%");
+                                   table.Cell().Padding(5).Text(item.LineTotal.ToString("0.00"));
+                               }
+                           });
+
+                        // ================= TOTALS + SIGNATURE =================
+                        col.Item().PaddingTop(10).Row(row =>
                         {
-                            row.RelativeItem().Column(c =>
-                            {
-                                c.Item().Text("Invoice To:").Bold();
-                                c.Item().Text($"Name: {invoice.CustomerName}");
-                                c.Item().Text($"Mobile No: {invoice.CustomerMobile}");
-                            });
+                            row.RelativeItem()
+                               .Border(1)
+                               .BorderColor(Colors.Grey.Lighten2)
+                               .Background(Colors.Grey.Lighten4)
+                               .Padding(10)
+                               .Column(c =>
+                               {
+                                   if (File.Exists(signaturePath))
+                                   {
+                                       c.Item().AlignCenter()
+                                           .Width(120)
+                                           .Image(signaturePath)
+                                           .FitWidth();
+                                   }
 
-                            row.ConstantItem(200).AlignRight().Column(c =>
-                            {
-                                c.Item().Text($"Invoice No: {invoice.InvoiceNo}");
-                                c.Item().Text($"Date: {invoice.InvoiceDate:dd-MM-yyyy}");
-                            });
+                                   c.Item().AlignCenter()
+                                       .Text("Authorized Signatory")
+                                       .Bold()
+                                       .FontSize(10);
+                               });
+
+                            row.ConstantItem(220)
+                               .Border(1)
+                               .BorderColor(Colors.Grey.Lighten2)
+                               .Background(Colors.White)
+                               .Padding(10)
+                               .Column(c =>
+                               {
+                                   c.Item().Text($"Sub Total: ₹ {subTotal:0.00}");
+                                   c.Item().Text($"Discount: ₹ {totalDiscount:0.00}");
+                                   c.Item().LineHorizontal(1);
+                                   c.Item().Text($"Grand Total: ₹ {invoice.GrandTotal:0.00}")
+                                       .FontSize(14)
+                                       .Bold();
+                               });
                         });
-
-                        col.Item().PaddingVertical(10).LineHorizontal(1);
-
-                        // ================= ITEMS =================
-                        col.Item().Table(table =>
-                        {
-                            table.ColumnsDefinition(columns =>
-                            {
-                                columns.ConstantColumn(30);
-                                columns.RelativeColumn(4);
-                                columns.RelativeColumn(1);
-                                columns.RelativeColumn(1);
-                                columns.RelativeColumn(1);
-                                columns.RelativeColumn(1);
-                            });
-
-                            table.Header(header =>
-                            {
-                                header.Cell().Text("No.").Bold();
-                                header.Cell().Text("Items").Bold();
-                                header.Cell().Text("Price").Bold();
-                                header.Cell().Text("Qty").Bold();
-                                header.Cell().Text("Discount").Bold();
-                                header.Cell().Text("Total").Bold();
-                            });
-
-                            int i = 1;
-                            foreach (var item in invoice.Items)
-                            {
-                                table.Cell().Text(i++.ToString());
-                                table.Cell().Text(item.Title);
-                                table.Cell().Text(item.MRP.ToString("0.00"));
-                                table.Cell().Text(item.Quantity.ToString());
-                                table.Cell().Text($"{item.DiscountPercent:0.#}%");
-                                table.Cell().Text(item.LineTotal.ToString("0.00"));
-                            }
-                        });
-
-                        col.Item().PaddingVertical(10).LineHorizontal(1);
-
-                        // ================= TOTALS =================
-                        col.Item().Row(row =>
-                        {
-                            row.RelativeItem().Column(c =>
-                            {
-                                c.Item().PaddingTop(20);
-
-                                if (File.Exists(signaturePath))
-                                {
-                                    c.Item()
-                                        .Width(120)
-                                        .Image(signaturePath)
-                                        .FitWidth();
-                                }
-
-                                c.Item().PaddingTop(5)
-                                    .Text("Authorized Signatory")
-                                    .Bold();
-                            });
-
-                            row.ConstantItem(200).AlignRight().Column(c =>
-                            {
-                                c.Item().Text($"Sub Total: ₹ {subTotal:0.00}");
-                                c.Item().Text($"Discount: ₹ {totalDiscount:0.00}");
-                                c.Item().Text($"Total: ₹ {invoice.GrandTotal:0.00}")
-                                    .FontSize(14)
-                                    .Bold();
-                            });
-                        });
-
-                        col.Item().PaddingTop(20).LineHorizontal(1);
 
                         // ================= FOOTER =================
-                        col.Item().AlignCenter().Column(c =>
+                        col.Item().PaddingTop(15).AlignCenter().Column(c =>
                         {
-                            c.Item().Text(AddressLine).SemiBold();
-                            c.Item().Text(Phone);
-                            c.Item().Text($"{Website} | {Email}");
+                            c.Item().Text(AddressLine)
+                                .FontSize(9)
+                                .FontColor(Colors.Grey.Darken1);
+
+                            c.Item().Text($"{Phone} | {Website} | {Email}")
+                                .FontSize(9)
+                                .FontColor(Colors.Grey.Darken1);
+
+                            c.Item()
+                                .PaddingTop(8)
+                                .Border(1)
+                                .BorderColor(Colors.Grey.Lighten2)
+                                .Padding(6)
+                                .AlignCenter()
+                                .Text("This is a computer generated invoice with a digital signature.")
+                                .FontSize(9)
+                                .Italic()
+                                .FontColor(Colors.Grey.Darken1);
                         });
                     });
                 });
