@@ -99,6 +99,30 @@ namespace BookInventory.Controllers
             return RedirectToAction("Create", "Billing");
         }
 
+        [AuthorizeRole("Admin")]
+        public IActionResult List()
+        {
+            var invoices = _invoiceService.GetAll();
+            return View(invoices);
+        }
+
+        [AuthorizeRole("Admin")]
+        public IActionResult Download(string id)
+        {
+            var invoice = _invoiceService.Get(id);
+            if (invoice == null)
+                return NotFound();
+
+            var pdfBytes = _pdfService.GenerateInvoicePdf(invoice);
+
+            var safeName = SanitizeFileName(invoice.CustomerName);
+            var datePart = invoice.InvoiceDate.ToString("yyyy-MM-dd_HH-mm-ss");
+
+            var fileName = $"{invoice.CustomerMobile}_{safeName}_{datePart}_INV-{invoice.InvoiceNo:D4}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+
         // ===============================
         // HELPERS
         // ===============================

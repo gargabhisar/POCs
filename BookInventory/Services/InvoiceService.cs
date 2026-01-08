@@ -16,6 +16,10 @@ namespace BookInventory.Services
         {
             _repo.Save(invoice);
         }
+
+        public List<Invoice> GetAll() => _repo.GetAll();
+
+        public Invoice Get(string id) => _repo.GetById(id);
     }
 
 }
