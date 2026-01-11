@@ -30,11 +30,23 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Customer Mobile</label>
+                        <label class="form-label">
+                            Customer Mobile <span class="text-danger">*</span>
+                        </label>
+
                         <input asp-for="CustomerMobile"
                                class="form-control"
+                               id="customerMobile"
+                               maxlength="10"
+                               inputmode="numeric"
+                               placeholder="10-digit mobile number"
                                required />
+
+                        <div class="invalid-feedback">
+                            Mobile number must be exactly 10 digits.
+                        </div>
                     </div>
+
                 </div>
 
                 <hr />
@@ -172,3 +184,26 @@
         });
     </script>
 }
+<script>
+    const mobileInput = document.getElementById("customerMobile");
+
+    mobileInput.addEventListener("input", function () {
+        // Allow digits only
+        this.value = this.value.replace(/\D/g, "");
+
+        // Validate length
+        if (this.value.length !== 10) {
+            this.classList.add("is-invalid");
+        } else {
+            this.classList.remove("is-invalid");
+        }
+    });
+
+    // Prevent form submit if invalid
+    document.querySelector("form").addEventListener("submit", function (e) {
+        if (mobileInput.value.length !== 10) {
+            mobileInput.classList.add("is-invalid");
+            e.preventDefault();
+        }
+    });
+</script>
