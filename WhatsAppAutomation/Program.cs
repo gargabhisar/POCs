@@ -8,9 +8,10 @@ class Program
 {
     static void Main()
     {
-        string excelPath = "C:/Users/abhis/Downloads/whatsapp_bulk.xlsx";
+        string excelPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "whatsapp_Bronze_Package_Authors.xlsx");
         int minDelaySeconds = 10;
         int maxDelaySeconds = 20;
+        Random random = new();
 
         Console.WriteLine("🔧 Setting up ChromeDriver...");
 
@@ -27,12 +28,11 @@ class Program
         driver.Navigate().GoToUrl("https://web.whatsapp.com");
 
         Console.WriteLine("📱 Scan QR if required (15 seconds)...");
-        
+        Thread.Sleep(random.Next(15000, 20000));
+
         using var workbook = new XLWorkbook(excelPath);
         var sheet = workbook.Worksheet(1);
         var rows = sheet.RangeUsed().RowsUsed().Skip(1);
-
-        Random random = new();
 
         foreach (var row in rows)
         {
@@ -80,15 +80,19 @@ class Program
 
     static readonly string MessageTemplate = @"Hello {{AuthorName}}! 👋
 
-*InkQuills Publishing House* will be present at the *_New Delhi World Book Fair 2026_* at *_Bharat Mandapam (10–18 Jan 2026)_* — India’s biggest celebration of books and readers.
+Warm greetings from *InkQuills Publishing House*! 📚✨
 
-This is a wonderful opportunity to *showcase your book to lakhs of readers*, gain visibility at our stall, and engage directly through curated book displays, reader interactions, signing sessions, and creative promotions across the fair and social media.
+We’re delighted to welcome you onboard and thank you for choosing InkQuills to publish your book under our *Bronze Publishing Package*. It was a pleasure connecting with you at the *New Delhi World Book Fair 2026*, and we truly appreciate the trust you’ve placed in us.
 
-If you’d like your book to be *featured and highlighted at the fair*, just reply “YES” and we’ll share the available options best suited for your book. Participation is limited and allotted on a first-come basis.
+This message confirms that we have received your _advance payment of ₹1,000_, marking the official start of your publishing journey with us.
 
-✨ *Even if you choose not to feature your book this time, do drop by our stall* — meet the InkQuills team, connect with fellow authors, and be part of the growing author community.
+We will now be waiting for your _manuscript in typed (digital) format_ so that we can begin the publishing process and take things forward smoothly.
 
-Looking forward to meeting you at India’s biggest book fair! 📖
+Once again, welcome to the *InkQuills family*. We look forward to working closely with you and bringing your book to life.
 
-— Team InkQuills";
+Warm regards,
+Abhisar Garg
+Director
+InkQuills Publishing House";
+
 }

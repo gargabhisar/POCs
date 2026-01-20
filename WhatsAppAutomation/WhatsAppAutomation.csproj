@@ -12,4 +12,14 @@
     <PackageReference Include="Selenium.WebDriver" Version="4.39.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="wwwroot\whatsapp_Bronze_Package_Authors.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
