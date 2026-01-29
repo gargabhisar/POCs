@@ -63,7 +63,6 @@ namespace BookInventory.Controllers
 
                 item.Title = book.Title;
                 item.MRP = book.MRP;
-                item.DiscountPercent = book.DiscountPercent;
             }
 
             invoice.InvoiceDate = DateTime.Now;
