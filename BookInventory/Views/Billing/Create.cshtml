@@ -137,14 +137,14 @@
 
         <td><input class="form-control" readonly /></td>
         <td>
-             <input type="number"
+              <input type="number"
                 name="Items[${rowIndex}].DiscountPercent"
                 class="form-control discount-input"
                 min="0"
                 max="100"
-                step="0.1"
+                step="1"
                 value="0"
-                onchange="recalc()" />
+                oninput="validateDiscount(this); recalc()" />
         </td>
         <td><input class="form-control" readonly /></td>
 
@@ -161,7 +161,7 @@
 
         <td>
             <input type="text"
-                   name="Items[${rowIndex}].Comment"
+                   name="Items[${rowIndex}].Remark"
                    class="form-control"
                    placeholder="Optional remark" />
         </td>
@@ -185,12 +185,9 @@
             const row = select.closest("tr");
 
             const mrp = parseFloat(opt.dataset.mrp || 0);
-            const discount = parseFloat(opt.dataset.discount || 0);
+            const discount = parseInt(opt.dataset.discount || 0, 10);
 
-            // Set MRP
             row.children[1].querySelector("input").value = mrp;
-
-            // Set default discount (NOW b is available via dataset)
             row.querySelector(".discount-input").value = discount;
 
             recalc();
@@ -215,6 +212,25 @@
 
             document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
         }
+
+        function validateDiscount(input) {
+            let value = parseInt(input.value, 10);
+
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            if (value < 0) {
+                value = 0;
+            }
+
+            if (value > 100) {
+                value = 100;
+            }
+
+            input.value = value;
+        }
+
 
     </script>
 }

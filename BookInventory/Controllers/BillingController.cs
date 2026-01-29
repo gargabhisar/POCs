@@ -63,6 +63,9 @@ namespace BookInventory.Controllers
 
                 item.Title = book.Title;
                 item.MRP = book.MRP;
+
+                // 🔒 HARD LIMIT DISCOUNT
+                item.DiscountPercent = Math.Clamp((int)item.DiscountPercent, 0, 100);
             }
 
             invoice.InvoiceDate = DateTime.Now;
