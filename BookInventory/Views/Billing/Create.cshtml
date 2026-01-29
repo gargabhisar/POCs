@@ -198,19 +198,20 @@
 
             document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
                 const mrp = parseFloat(row.children[1].querySelector("input").value || 0);
-                const discount = parseFloat(row.querySelector(".discount-input").value || 0);
-                const qty = parseInt(row.querySelector("input[name$='.Quantity']").value || 0);
+                const discount = parseInt(row.querySelector(".discount-input").value || 0, 10);
+                const qty = parseInt(row.querySelector("input[name$='.Quantity']").value || 0, 10);
 
-                const finalPrice = mrp - (mrp * discount / 100);
+                const finalPrice = Math.ceil(mrp - (mrp * discount / 100));
+
                 const total = finalPrice * qty;
 
-                row.children[3].querySelector("input").value = finalPrice.toFixed(2);
-                row.querySelector(".lineTotal").innerText = total.toFixed(2);
+                row.children[3].querySelector("input").value = finalPrice;
+                row.querySelector(".lineTotal").innerText = total;
 
                 grandTotal += total;
             });
 
-            document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
+            document.getElementById("grandTotal").innerText = grandTotal;
         }
 
         function validateDiscount(input) {
