@@ -10,6 +10,7 @@ namespace BookInventory.Models
         public string Id { get; set; }   // ✅ STRING
         public int InvoiceNo { get; set; }   // ✅ NEW
         public DateTime InvoiceDate { get; set; }
+        public string PaymentMode { get; set; }   // Cash / UPI / Card
         public string CustomerName { get; set; }
         public string CustomerMobile { get; set; }
         public List<InvoiceItem> Items { get; set; }

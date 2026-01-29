@@ -81,6 +81,7 @@ namespace BookInventory.Services
                                    c.Item().Text("Invoice To:\n").Bold();
                                    c.Item().Text($"Name: {invoice.CustomerName}");
                                    c.Item().Text($"Mobile No: {invoice.CustomerMobile}");
+                                   c.Item().Text($"Payment Mode: {invoice.PaymentMode}");
                                });
 
                             row.ConstantItem(220)

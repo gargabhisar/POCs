@@ -33,6 +33,7 @@
             <th>Customer</th>
             <th>Mobile</th>
             <th>Total</th>
+            <th>Payment Mode</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -45,6 +46,7 @@
                 <td>@inv.CustomerName</td>
                 <td>@inv.CustomerMobile</td>
                 <td>₹ @inv.GrandTotal.ToString("0.00")</td>
+                <td>@inv.PaymentMode</td>
                 <td>
                     <a class="btn btn-sm btn-outline-primary"
                        asp-action="Download"
