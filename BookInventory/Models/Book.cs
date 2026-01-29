@@ -17,7 +17,7 @@ namespace BookInventory.Models
         public int TotalQuantity { get; set; }
         public BookLocations Locations { get; set; }
 
-        public decimal MRP { get; set; }  
+        public int MRP { get; set; }  
         public decimal DiscountPercent { get; set; }
 
         public DateTime CreatedAt { get; set; }
