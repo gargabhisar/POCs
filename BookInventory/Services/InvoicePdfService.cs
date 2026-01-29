@@ -112,6 +112,7 @@ namespace BookInventory.Services
                                    columns.RelativeColumn(1);
                                    columns.RelativeColumn(1);
                                    columns.RelativeColumn(1);
+                                   columns.RelativeColumn(1);
                                });
 
                                table.Header(header =>
@@ -122,6 +123,7 @@ namespace BookInventory.Services
                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Qty").Bold();
                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Disc %").Bold();
                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Total").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Remarks").Bold();
                                });
 
                                int i = 1;
@@ -133,6 +135,7 @@ namespace BookInventory.Services
                                    table.Cell().Padding(5).Text(item.Quantity.ToString());
                                    table.Cell().Padding(5).Text($"{item.DiscountPercent:0.#}%");
                                    table.Cell().Padding(5).Text(item.LineTotal.ToString("0.00"));
+                                   table.Cell().Padding(5).Text(item.Remark);
                                }
                            });
 

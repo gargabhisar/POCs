@@ -78,6 +78,7 @@
                             <th>Final Price</th>
                             <th>Qty</th>
                             <th>Total</th>
+                            <th>Remark</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -118,7 +119,7 @@
 
             const row = document.createElement("tr");
 
-                    row.innerHTML = `
+                            row.innerHTML = `
         <td>
             <select name="Items[${rowIndex}].BookId"
                     class="form-select"
@@ -133,9 +134,11 @@
                 ).join("")}
             </select>
         </td>
+
         <td><input class="form-control" readonly /></td>
         <td><input class="form-control" readonly /></td>
         <td><input class="form-control" readonly /></td>
+
         <td>
             <input type="number"
                    name="Items[${rowIndex}].Quantity"
@@ -144,7 +147,16 @@
                    value="1"
                    onchange="recalc()" />
         </td>
+
         <td class="lineTotal">0</td>
+
+        <td>
+            <input type="text"
+                   name="Items[${rowIndex}].Comment"
+                   class="form-control"
+                   placeholder="Optional remark" />
+        </td>
+
         <td>
             <button type="button"
                     class="btn btn-sm btn-danger"

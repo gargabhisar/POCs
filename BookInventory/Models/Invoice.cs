@@ -26,5 +26,6 @@ namespace BookInventory.Models
         public int Quantity { get; set; }
         public decimal FinalPrice => MRP - (MRP * DiscountPercent / 100);
         public decimal LineTotal => FinalPrice * Quantity;
+        public string Remark { get; set; }
     }
 }
