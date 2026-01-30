@@ -1,0 +1,37 @@
+﻿@model List<BookInventory.Models.PublishingInvoice>
+
+<h3>Publishing Invoices</h3>
+
+<table class="table table-bordered table-hover mt-3">
+    <thead class="table-light">
+        <tr>
+            <th>Invoice No</th>
+            <th>Date</th>
+            <th>Author</th>
+            <th>Mobile</th>
+            <th>Tax Type</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var inv in Model)
+        {
+            <tr>
+                <td>INV-@inv.InvoiceNo.ToString("D4")</td>
+                <td>@inv.InvoiceDate.ToString("dd-MM-yyyy")</td>
+                <td>@inv.AuthorName</td>
+                <td>@inv.AuthorMobile</td>
+                <td>@inv.TaxType</td>
+                <td>₹ @inv.GrandTotal.ToString("0")</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-success"
+                       asp-action="DownloadPublishing"
+                       asp-route-id="@inv.Id">
+                        PDF
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

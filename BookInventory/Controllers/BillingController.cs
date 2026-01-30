@@ -13,17 +13,26 @@ namespace BookInventory.Controllers
         private readonly InvoiceService _invoiceService;
         private readonly InvoicePdfService _pdfService;
         private readonly CounterRepository _counterRepo;
+        private readonly PublishingServiceService _publishingService;
+        private readonly PublishingInvoiceRepository _publishingInvoiceRepo;
+        private readonly PublishingInvoicePdfService _publishingPdfService;
 
         public BillingController(
-        BookService bookService,
-        InvoiceService invoiceService,
-        InvoicePdfService pdfService,
-        CounterRepository counterRepo)
+            BookService bookService,
+            InvoiceService invoiceService,
+            InvoicePdfService pdfService,
+            CounterRepository counterRepo,
+            PublishingServiceService publishingService,
+            PublishingInvoiceRepository publishingInvoiceRepo,
+            PublishingInvoicePdfService publishingPdfService)
         {
             _bookService = bookService;
             _invoiceService = invoiceService;
             _pdfService = pdfService;
             _counterRepo = counterRepo;
+            _publishingService = publishingService;
+            _publishingInvoiceRepo = publishingInvoiceRepo;
+            _publishingPdfService = publishingPdfService;
         }
 
         // ===============================
@@ -108,6 +117,20 @@ namespace BookInventory.Controllers
             return File(pdf, "application/pdf", fileName);
         }
 
+        public IActionResult DownloadPublishingLast()
+        {
+            var pdf = HttpContext.Session.Get("LastInvoicePdf");
+            var fileName = HttpContext.Session.GetString("LastInvoiceFileName");
+
+            if (pdf == null || fileName == null)
+                return NotFound();
+
+            HttpContext.Session.Remove("LastInvoicePdf");
+            HttpContext.Session.Remove("LastInvoiceFileName");
+
+            return File(pdf, "application/pdf", fileName);
+        }
+
         [AuthorizeRole("Admin")]
         public IActionResult List()
         {
@@ -128,6 +151,120 @@ namespace BookInventory.Controllers
             var datePart = invoice.InvoiceDate.ToString("yyyy-MM-dd_HH-mm-ss");
 
             var fileName = $"{invoice.CustomerMobile}_{safeName}_{datePart}_INV-{invoice.InvoiceNo:D4}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+
+        [AuthorizeRole("Admin")]
+        public IActionResult CreatePublishing()
+        {
+            ViewBag.Services = _publishingService.GetActiveServices();
+            return View(new PublishingInvoice
+            {
+                Services = new List<PublishingInvoiceItem>()
+            });
+        }
+
+        [HttpPost]
+        [AuthorizeRole("Admin")]
+        public IActionResult CreatePublishing(PublishingInvoice invoice)
+        {
+            if (invoice.Services == null || !invoice.Services.Any())
+            {
+                ModelState.AddModelError("", "At least one service is required.");
+                ViewBag.Services = _publishingService.GetActiveServices();
+                return View(invoice);
+            }
+
+            invoice.InvoiceNo = _counterRepo.GetNextInvoiceNumber();
+            invoice.InvoiceDate = DateTime.Now;
+
+            decimal subTotal = 0;
+            decimal igst = 0, cgst = 0, sgst = 0;
+
+            foreach (var item in invoice.Services)
+            {
+                var service = _publishingService.Get(item.ServiceId);
+                if (service == null || !service.IsActive)
+                    return BadRequest("Invalid service selected.");
+
+                // Snapshot service data
+                item.ServiceName = service.Name;
+                item.BasePrice = service.Price;
+
+                // 🔒 Discount (integer, capped)
+                item.DiscountPercent = Math.Clamp(item.DiscountPercent, 0, 100);
+
+                item.DiscountAmount =
+                    Math.Ceiling(item.BasePrice * item.DiscountPercent / 100);
+
+                item.TaxableAmount =
+                    item.BasePrice - item.DiscountAmount;
+
+                subTotal += item.TaxableAmount;
+            }
+
+            // 🔹 TAX CALCULATION (18%)
+            if (invoice.TaxType == "IGST")
+            {
+                igst = Math.Ceiling(subTotal * 0.18m);
+            }
+            else
+            {
+                cgst = Math.Ceiling(subTotal * 0.09m);
+                sgst = Math.Ceiling(subTotal * 0.09m);
+            }
+
+            invoice.IGST = igst;
+            invoice.CGST = cgst;
+            invoice.SGST = sgst;
+
+            invoice.SubTotal = subTotal;
+            invoice.GrandTotal = subTotal + igst + cgst + sgst;
+
+            _publishingInvoiceRepo.Insert(invoice);
+
+            var pdfBytes = _publishingPdfService.Generate(invoice);
+
+            var safeName = SanitizeFileName(invoice.AuthorName);
+            var datePart = invoice.InvoiceDate.ToString("yyyy-MM-dd_HH-mm-ss");
+
+            var fileName = $"{invoice.AuthorMobile}_{safeName}_{datePart}_INV-{invoice.InvoiceNo:D4}.pdf";
+
+            // 🔐 Store in Session
+            HttpContext.Session.Set("LastInvoicePdf", pdfBytes);
+            HttpContext.Session.SetString("LastInvoiceFileName", fileName);
+
+            TempData["Success"] = "Publishing invoice saved successfully.";
+
+            return RedirectToAction("CreatePublishing", new { download = 1 });
+        }
+
+        [AuthorizeRole("Admin")]
+        public IActionResult PublishingList()
+        {
+            var invoices = _publishingInvoiceRepo
+                .GetAll()
+                .OrderByDescending(x => x.InvoiceNo)
+                .ToList();
+
+            return View(invoices);
+        }
+
+        [AuthorizeRole("Admin")]
+        public IActionResult DownloadPublishing(string id)
+        {
+            var invoice = _publishingInvoiceRepo.GetById(id);
+            if (invoice == null)
+                return NotFound();
+
+            var pdfBytes = _publishingPdfService.Generate(invoice);
+
+            var safeName = SanitizeFileName(invoice.AuthorName);
+            var datePart = invoice.InvoiceDate.ToString("yyyy-MM-dd_HH-mm-ss");
+
+            var fileName =
+                $"{invoice.AuthorMobile}_{safeName}_{datePart}_INV-{invoice.InvoiceNo:D4}.pdf";
 
             return File(pdfBytes, "application/pdf", fileName);
         }

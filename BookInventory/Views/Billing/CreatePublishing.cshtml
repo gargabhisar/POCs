@@ -1,0 +1,213 @@
+﻿@model BookInventory.Models.PublishingInvoice
+@using BookInventory.Models
+
+@{
+    var services = ViewBag.Services as List<PublishingService>;
+}
+
+@if (Context.Request.Query["download"] == "1" && TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<h3>Publishing Invoice</h3>
+
+<form method="post">
+
+    <!-- AUTHOR DETAILS -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Author Name</label>
+            <input asp-for="AuthorName" class="form-control" required />
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Mobile No</label>
+            <input asp-for="AuthorMobile"
+                   class="form-control"
+                   maxlength="10"
+                   required />
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">Tax Type</label>
+            <select asp-for="TaxType" class="form-select" onchange="recalc()">
+                <option value="IGST">IGST (18%)</option>
+                <option value="CGST_SGST">CGST + SGST (9% + 9%)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Author Address</label>
+        <textarea asp-for="AuthorAddress"
+                  class="form-control"
+                  rows="3"
+                  required></textarea>
+    </div>
+
+    <hr />
+
+    <!-- SERVICES TABLE -->
+    <table class="table table-bordered" id="servicesTable">
+        <thead>
+            <tr>
+                <th>Service</th>
+                <th>Base Price</th>
+                <th>Discount %</th>
+                <th>Taxable Amount</th>
+                <th>Line Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button type="button"
+            class="btn btn-outline-primary mb-3"
+            onclick="addServiceRow()">
+        + Add Service
+    </button>
+
+    <!-- TOTALS -->
+    <div class="text-end">
+        <h5>Sub Total: ₹ <span id="subTotal">0</span></h5>
+        <h5>Tax: ₹ <span id="taxTotal">0</span></h5>
+        <h4>Grand Total: ₹ <span id="grandTotal">0</span></h4>
+    </div>
+
+    <button class="btn btn-success mt-3">
+        Generate Publishing Invoice
+    </button>
+</form>
+
+@section Scripts {
+
+    <script>
+            const services = @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(services)
+                    );
+
+        function addServiceRow() {
+            const tbody = document.querySelector("#servicesTable tbody");
+            const index = tbody.children.length;
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+        <td>
+            <select name="Services[${index}].ServiceId"
+                    class="form-select"
+                    onchange="onServiceChange(this)">
+                <option value="">-- Select Service --</option>
+                ${services.map(s =>
+                    `<option value="${s.Id}"
+                             data-price="${s.Price}">
+                        ${s.Name}
+                    </option>`
+                ).join("")}
+            </select>
+        </td>
+
+        <td>
+            <input class="form-control"
+                   name="Services[${index}].BasePrice"
+                   readonly />
+        </td>
+
+        <td>
+            <input type="number"
+                   name="Services[${index}].DiscountPercent"
+                   class="form-control discount-input"
+                   min="0"
+                   max="100"
+                   step="1"
+                   value="0"
+                   oninput="validateDiscount(this); recalc()" />
+        </td>
+
+        <td class="taxable">0</td>
+        <td class="lineTotal">0</td>
+
+        <td>
+            <button type="button"
+                    class="btn btn-sm btn-danger"
+                    onclick="this.closest('tr').remove(); recalc();">
+                ✕
+            </button>
+        </td>
+        `;
+
+                tbody.appendChild(row);
+            }
+
+            function onServiceChange(select) {
+                const opt = select.selectedOptions[0];
+                if (!opt) return;
+
+                const row = select.closest("tr");
+                const price = parseFloat(opt.dataset.price || 0);
+
+                row.querySelector("input[name$='.BasePrice']").value = price;
+
+                recalc();
+            }
+
+            function validateDiscount(input) {
+                let value = parseInt(input.value || 0, 10);
+
+                if (value < 0) value = 0;
+                if (value > 100) value = 100;
+
+                input.value = value;
+            }
+
+            function recalc() {
+                let subTotal = 0;
+                let taxTotal = 0;
+
+                const taxType = document.getElementById("TaxType").value;
+
+                document.querySelectorAll("#servicesTable tbody tr").forEach(row => {
+                    const base = parseFloat(row.querySelector("input[name$='.BasePrice']").value || 0);
+                    const discount = parseInt(row.querySelector(".discount-input").value || 0, 10);
+
+                    const discountAmount = Math.ceil(base * discount / 100);
+                    const taxable = base - discountAmount;
+
+                    let lineTax = 0;
+                    if (taxType === "IGST") {
+                        lineTax = Math.ceil(taxable * 0.18);
+                    } else {
+                        lineTax = Math.ceil(taxable * 0.18);
+                    }
+
+                    const lineTotal = taxable + lineTax;
+
+                    row.querySelector(".taxable").innerText = taxable;
+                    row.querySelector(".lineTotal").innerText = lineTotal;
+
+                    subTotal += taxable;
+                    taxTotal += lineTax;
+                });
+
+                document.getElementById("subTotal").innerText = subTotal;
+                document.getElementById("taxTotal").innerText = taxTotal;
+                document.getElementById("grandTotal").innerText = subTotal + taxTotal;
+            }
+    </script>
+@if (Context.Request.Query["download"] == "1")
+    {
+        <script>
+            window.addEventListener("load", function () {
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("DownloadPublishingLast", "Billing")';
+                }, 300);
+            });
+        </script>
+    }
+
+}

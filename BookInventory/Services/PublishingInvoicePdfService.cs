@@ -5,10 +5,19 @@ using QuestPDF.Infrastructure;
 
 namespace BookInventory.Services
 {
-    public class InvoicePdfService
+    public class PublishingInvoicePdfService
     {
         const string GSTIN = "09AAECI4545H1ZG";
         const string PAN = "AAECI4545H";
+
+        const string BankDetails =
+            @"Name: InkQuills Publishing House
+            Bank Name: ICICI Bank
+            Branch Name: Hinjewadi Branch
+            IFSC: ICIC0000986
+            Account Number: 098605007411
+            Account Type: Current Account
+            UPI ID: inkquillsph@icici";
 
         const string AddressLine =
             "T3-706, Exotica Dreamville, Sector 16C,\n" +
@@ -19,15 +28,19 @@ namespace BookInventory.Services
         const string Website = "www.inkquills.in";
         const string Email = "info@inkquills.in";
 
-        public byte[] GenerateInvoicePdf(Invoice invoice)
+        public byte[] Generate(PublishingInvoice invoice)
         {
-            var subTotal = invoice.Items.Sum(i => i.MRP * i.Quantity);
-            var totalDiscount = invoice.Items.Sum(i =>
-                (i.MRP * i.DiscountPercent / 100) * i.Quantity
+            var logoPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "inkquills-logo.png"
             );
 
-            var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "inkquills-logo.png");
-            var signaturePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "signature.png");
+            var signaturePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "signature.png"
+            );
 
             return Document.Create(container =>
             {
@@ -68,7 +81,7 @@ namespace BookInventory.Services
                                });
                            });
 
-                        // ================= CUSTOMER + INVOICE =================
+                        // ================= AUTHOR + INVOICE =================
                         col.Item().PaddingTop(10).Row(row =>
                         {
                             row.RelativeItem()
@@ -79,9 +92,10 @@ namespace BookInventory.Services
                                .Column(c =>
                                {
                                    c.Item().Text("Invoice To:\n").Bold();
-                                   c.Item().Text($"Name: {invoice.CustomerName}");
-                                   c.Item().Text($"Mobile No: {invoice.CustomerMobile}");
-                                   c.Item().Text($"Payment Mode: {invoice.PaymentMode}");
+                                   c.Item().Text($"Author Name: {invoice.AuthorName}");
+                                   c.Item().Text($"Mobile No: {invoice.AuthorMobile}");
+                                   c.Item().Text("Address:");
+                                   c.Item().Text(invoice.AuthorAddress);
                                });
 
                             row.ConstantItem(220)
@@ -96,7 +110,7 @@ namespace BookInventory.Services
                                });
                         });
 
-                        // ================= ITEMS TABLE =================
+                        // ================= SERVICES TABLE =================
                         col.Item().PaddingTop(10)
                            .Border(1)
                            .BorderColor(Colors.Grey.Lighten2)
@@ -111,31 +125,25 @@ namespace BookInventory.Services
                                    columns.RelativeColumn(1);
                                    columns.RelativeColumn(1);
                                    columns.RelativeColumn(1);
-                                   columns.RelativeColumn(1);
-                                   columns.RelativeColumn(1);
                                });
 
                                table.Header(header =>
                                {
                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("#").Bold();
-                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Item").Bold();
-                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("MRP").Bold();
-                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Qty").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Service").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Price").Bold();
                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Disc %").Bold();
-                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Total").Bold();
-                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Remarks").Bold();
+                                   header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Taxable").Bold();
                                });
 
                                int i = 1;
-                               foreach (var item in invoice.Items)
+                               foreach (var s in invoice.Services)
                                {
                                    table.Cell().Padding(5).Text(i++.ToString());
-                                   table.Cell().Padding(5).Text(item.Title);
-                                   table.Cell().Padding(5).Text(item.MRP.ToString("0.00"));
-                                   table.Cell().Padding(5).Text(item.Quantity.ToString());
-                                   table.Cell().Padding(5).Text($"{item.DiscountPercent:0.#}%");
-                                   table.Cell().Padding(5).Text(item.LineTotal.ToString("0.00"));
-                                   table.Cell().Padding(5).Text(item.Remark);
+                                   table.Cell().Padding(5).Text(s.ServiceName);
+                                   table.Cell().Padding(5).Text(s.BasePrice.ToString("0.00"));
+                                   table.Cell().Padding(5).Text($"{s.DiscountPercent}%");
+                                   table.Cell().Padding(5).Text(s.TaxableAmount.ToString("0.00"));
                                }
                            });
 
@@ -170,14 +178,41 @@ namespace BookInventory.Services
                                .Padding(10)
                                .Column(c =>
                                {
-                                   c.Item().Text($"Sub Total: ₹ {subTotal:0.00}");
-                                   c.Item().Text($"Discount: ₹ {totalDiscount:0.00}");
+                                   c.Item().Text($"Sub Total: ₹ {invoice.SubTotal:0.00}");
+
+                                   if (invoice.TaxType == "IGST")
+                                   {
+                                       c.Item().Text($"IGST (18%): ₹ {invoice.IGST:0.00}");
+                                   }
+                                   else
+                                   {
+                                       c.Item().Text($"CGST (9%): ₹ {invoice.CGST:0.00}");
+                                       c.Item().Text($"SGST (9%): ₹ {invoice.SGST:0.00}");
+                                   }
+
                                    c.Item().LineHorizontal(1);
+
                                    c.Item().Text($"Grand Total: ₹ {invoice.GrandTotal:0.00}")
                                        .FontSize(14)
                                        .Bold();
                                });
                         });
+
+                        // ================= BANK DETAILS =================
+                        col.Item().PaddingTop(10)
+                           .Border(1)
+                           .BorderColor(Colors.Grey.Lighten2)
+                           .Background(Colors.White)
+                           .Padding(10)
+                           .Column(c =>
+                           {
+                               c.Item().Text("Bank Details")
+                                   .Bold();
+
+                               c.Item().PaddingTop(5)
+                                   .Text(BankDetails)
+                                   .FontSize(10);
+                           });
 
                         // ================= FOOTER =================
                         col.Item().PaddingTop(15).AlignCenter().Column(c =>

@@ -30,6 +30,10 @@ builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<InvoiceService>();
 builder.Services.AddScoped<InvoiceRepository>();
 builder.Services.AddScoped<InvoicePdfService>();
+builder.Services.AddScoped<PublishingServiceRepository>();
+builder.Services.AddScoped<PublishingServiceService>();
+builder.Services.AddScoped<PublishingInvoiceRepository>();
+builder.Services.AddScoped<PublishingInvoicePdfService>();
 
 var app = builder.Build();
 
