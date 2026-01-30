@@ -2,6 +2,7 @@
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using QRCoder;
 
 namespace BookInventory.Services
 {
@@ -41,6 +42,27 @@ namespace BookInventory.Services
                 "wwwroot",
                 "signature.png"
             );
+
+            var upiId = "inkquillsph@icici";
+            var payeeName = "InkQuills Publishing House";
+
+            // Optional: include invoice number & amount
+            var upiAmount = invoice.GrandTotal.ToString("0.00");
+
+            var upiString =
+                $"upi://pay?pa={upiId}" +
+                $"&pn={Uri.EscapeDataString(payeeName)}" +
+                $"&am={upiAmount}" +
+                $"&cu=INR";
+
+            byte[] upiQrBytes;
+
+            using (var qrGenerator = new QRCodeGenerator())
+            using (var qrData = qrGenerator.CreateQrCode(upiString, QRCodeGenerator.ECCLevel.Q))
+            using (var qrCode = new PngByteQRCode(qrData))
+            {
+                upiQrBytes = qrCode.GetGraphic(20);
+            }
 
             return Document.Create(container =>
             {
@@ -234,13 +256,32 @@ namespace BookInventory.Services
                                    .BorderColor(Colors.Grey.Lighten2)
                                    .Background(Colors.White)
                                    .Padding(10)
-                                   .Column(c =>
+                                   .Row(row =>
                                    {
-                                       c.Item().Text("Bank Details").Bold();
-                                       c.Item().PaddingTop(5)
-                                           .Text(BankDetails)
-                                           .FontSize(10);
+                                       // LEFT: BANK DETAILS TEXT
+                                       row.RelativeItem().Column(c =>
+                                       {
+                                           c.Item().Text("Bank Details").Bold();
+
+                                           c.Item().PaddingTop(5)
+                                               .Text(BankDetails)
+                                               .FontSize(10);
+
+                                           c.Item().PaddingTop(6)
+                                               .Text("Scan the QR code to pay via UPI.")
+                                               .FontSize(9)
+                                               .Italic()
+                                               .FontColor(Colors.Grey.Darken1);
+                                       });
+
+                                       // RIGHT: UPI QR CODE
+                                       row.ConstantItem(120)
+                                           .AlignMiddle()
+                                           .AlignCenter()
+                                           .Image(upiQrBytes)
+                                           .FitWidth();
                                    });
+
 
                                 // ================= FOOTER =================
                                 col.Item().PaddingTop(15).AlignCenter().Column(c =>
