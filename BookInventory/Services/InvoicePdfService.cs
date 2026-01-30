@@ -48,24 +48,41 @@ namespace BookInventory.Services
                            .Padding(10)
                            .Row(row =>
                            {
-                               row.RelativeItem().Row(r =>
-                               {
-                                   r.ConstantItem(120)
-                                       .AlignMiddle()
-                                       .Image(logoPath)
-                                       .FitWidth();
-                               });
+                               // LOGO
+                               row.ConstantItem(120)
+                                   .AlignMiddle()
+                                   .Image(logoPath)
+                                   .FitWidth();
 
-                               row.ConstantItem(200).AlignRight().Column(c =>
-                               {
-                                   c.Item().Text("TAX INVOICE")
-                                       .FontSize(16)
-                                       .Bold()
-                                       .FontColor(Colors.Blue.Darken2);
+                               // ADDRESS + CONTACT (CENTER)
+                               row.RelativeItem()
+                                    .AlignMiddle()
+                                    .AlignCenter()
+                                    .Column(c =>
+                                    {
+                                        c.Item().AlignCenter()
+                                            .Text(AddressLine)
+                                            .FontSize(9);
 
-                                   c.Item().Text($"GSTIN: {GSTIN}");
-                                   c.Item().Text($"PAN: {PAN}");
-                               });
+                                        c.Item().PaddingTop(2)
+                                            .AlignCenter()
+                                            .Text($"{Phone} | {Website} | {Email}")
+                                            .FontSize(9);
+                                    });
+
+                               // TAX INVOICE (RIGHT)
+                               row.ConstantItem(120)
+                                   .AlignRight()
+                                   .Column(c =>
+                                   {
+                                       c.Item().Text("TAX INVOICE")
+                                           .FontSize(16)
+                                           .Bold()
+                                           .FontColor(Colors.Blue.Darken2);
+
+                                       c.Item().Text($"GSTIN: {GSTIN}").FontSize(9);
+                                       c.Item().Text($"PAN: {PAN}").FontSize(9);
+                                   });
                            });
 
                         // ================= CUSTOMER + INVOICE =================
@@ -182,14 +199,6 @@ namespace BookInventory.Services
                         // ================= FOOTER =================
                         col.Item().PaddingTop(15).AlignCenter().Column(c =>
                         {
-                            c.Item().Text(AddressLine)
-                                .FontSize(9)
-                                .FontColor(Colors.Grey.Darken1);
-
-                            c.Item().Text($"{Phone} | {Website} | {Email}")
-                                .FontSize(9)
-                                .FontColor(Colors.Grey.Darken1);
-
                             c.Item()
                                 .PaddingTop(8)
                                 .Border(1)
