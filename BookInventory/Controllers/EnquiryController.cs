@@ -45,10 +45,41 @@ namespace BookInventory.Controllers
         }
 
         // LIST VIEW
-        public IActionResult List()
+        public IActionResult List(string search, int page = 1)
         {
-            var enquiries = _repo.GetAll();
-            return View(enquiries);
+            const int pageSize = 10;
+
+            var all = _repo.GetAll(); // already sorted by SerialNo
+
+            // 🔍 SEARCH
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+
+                all = all.Where(x =>
+                    (!string.IsNullOrEmpty(x.Name) && x.Name.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(x.Mobile) && x.Mobile.Contains(search)) ||
+                    (!string.IsNullOrEmpty(x.Email) && x.Email.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(x.Comments) && x.Comments.ToLower().Contains(search))
+                ).ToList();
+            }
+
+            // 📄 PAGINATION
+            var totalCount = all.Count;
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var data = all
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.Search = search;
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalCount = totalCount;
+
+            return View(data);
         }
     }
 }

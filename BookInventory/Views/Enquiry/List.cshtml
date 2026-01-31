@@ -1,8 +1,31 @@
 ﻿@model List<BookInventory.Models.Enquiry>
 
+@{
+    var search = ViewBag.Search as string;
+    int pageNo = ViewBag.Page;
+    int totalPages = ViewBag.TotalPages;
+    int pageSize = ViewBag.PageSize;
+    int totalCount = ViewBag.TotalCount;
+}
+
 <h3>Enquiries</h3>
 
-<table class="table table-bordered table-hover mt-3">
+<!-- 🔍 SEARCH -->
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input name="search"
+               value="@search"
+               class="form-control"
+               placeholder="Search by name, mobile, email, comments" />
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary">Search</button>
+        <a asp-action="List" class="btn btn-secondary ms-1">Clear</a>
+    </div>
+</form>
+
+<table class="table table-bordered table-hover">
     <thead class="table-light">
         <tr>
             <th style="width:70px;">S.No</th>
@@ -36,3 +59,31 @@
         }
     </tbody>
 </table>
+
+<!-- 📄 PAGINATION INFO -->
+@if (totalCount > 0)
+{
+    <div class="text-muted mb-2">
+        Showing page @pageNo of @totalPages — Total @totalCount enquiries
+    </div>
+}
+
+<!-- 📄 PAGINATION -->
+@if (totalPages > 1)
+{
+    <nav>
+        <ul class="pagination">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == pageNo ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="List"
+                       asp-route-page="@i"
+                       asp-route-search="@search">
+                        @i
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
