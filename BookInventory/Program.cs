@@ -1,4 +1,5 @@
 ﻿using BookInventory.Data;
+using BookInventory.Filters;
 using BookInventory.Repositories;
 using BookInventory.Services;
 using QuestPDF.Infrastructure;
@@ -8,7 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<ClearEnquiryCacheFilter>();
+});
 
 // Session
 builder.Services.AddSession(options =>

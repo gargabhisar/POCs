@@ -11,6 +11,8 @@ namespace BookInventory.Controllers
         private readonly EnquiryRepository _repo;
         private readonly CounterRepository _counterRepo;
 
+        const string ENQUIRY_SESSION_KEY = "ENQUIRY_LIST_CACHE";
+
         public EnquiryController(
             EnquiryRepository repo,
             CounterRepository counterRepo)
@@ -49,13 +51,28 @@ namespace BookInventory.Controllers
         {
             const int pageSize = 10;
 
-            var all = _repo.GetAll(); // already sorted by SerialNo
+            List<Enquiry> all;
+
+            // 🔹 Load from Session if exists
+            var cached = HttpContext.Session.GetString(ENQUIRY_SESSION_KEY);
+
+            if (cached == null)
+            {
+                all = _repo.GetAll(); // DB hit only once
+                HttpContext.Session.SetString(
+                    ENQUIRY_SESSION_KEY,
+                    System.Text.Json.JsonSerializer.Serialize(all)
+                );
+            }
+            else
+            {
+                all = System.Text.Json.JsonSerializer.Deserialize<List<Enquiry>>(cached);
+            }
 
             // 🔍 SEARCH
             if (!string.IsNullOrWhiteSpace(search))
             {
-                search = search.Trim().ToLower();
-
+                search = search.ToLower();
                 all = all.Where(x =>
                     (!string.IsNullOrEmpty(x.Name) && x.Name.ToLower().Contains(search)) ||
                     (!string.IsNullOrEmpty(x.Mobile) && x.Mobile.Contains(search)) ||
