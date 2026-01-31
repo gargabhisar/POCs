@@ -58,7 +58,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//Commented this for HTTP/IIS
+//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
