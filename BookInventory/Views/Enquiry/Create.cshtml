@@ -1,0 +1,47 @@
+﻿@model BookInventory.Models.Enquiry
+
+<h3>New Enquiry</h3>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+<form method="post" class="mt-3">
+
+    <div class="mb-3">
+        <label>Name *</label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+        <label>Mobile *</label>
+        <input asp-for="Mobile"
+               class="form-control"
+               maxlength="10"
+               required />
+    </div>
+
+    <div class="mb-3">
+        <label>Email (Optional)</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Comments (Optional)</label>
+        <textarea asp-for="Comments"
+                  class="form-control"
+                  rows="3"></textarea>
+    </div>
+
+    <button class="btn btn-success">
+        Save Enquiry
+    </button>
+
+    <a asp-action="List"
+       class="btn btn-secondary ms-2">
+        View Enquiries
+    </a>
+</form>

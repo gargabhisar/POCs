@@ -1,0 +1,38 @@
+﻿@model List<BookInventory.Models.Enquiry>
+
+<h3>Enquiries</h3>
+
+<table class="table table-bordered table-hover mt-3">
+    <thead class="table-light">
+        <tr>
+            <th style="width:70px;">S.No</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th>Comments</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            foreach (var e in Model)
+            {
+                <tr>
+                    <td>@e.SerialNo</td>
+                    <td>@e.Name</td>
+                    <td>@e.Mobile</td>
+                    <td>@(string.IsNullOrWhiteSpace(e.Email) ? "-" : e.Email)</td>
+                    <td>@(string.IsNullOrWhiteSpace(e.Comments) ? "-" : e.Comments)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    No enquiries found
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

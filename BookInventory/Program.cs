@@ -34,6 +34,7 @@ builder.Services.AddScoped<PublishingServiceRepository>();
 builder.Services.AddScoped<PublishingServiceService>();
 builder.Services.AddScoped<PublishingInvoiceRepository>();
 builder.Services.AddScoped<PublishingInvoicePdfService>();
+builder.Services.AddScoped<EnquiryRepository>();
 
 var app = builder.Build();
 
