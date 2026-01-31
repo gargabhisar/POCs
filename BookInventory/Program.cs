@@ -14,9 +14,18 @@ builder.Services.AddControllersWithViews();
 // Session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(24); // ✅ 24 hours
+    options.IdleTimeout = TimeSpan.FromHours(24);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+
+    // ✅ FIX FOR HTTP IIS
+    options.Cookie.SameSite = SameSiteMode.Lax;
+
+    // for https
+    //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
+    // for http
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
 // MongoDB
@@ -53,6 +62,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax
+});
 app.UseSession();
 
 app.UseAuthorization();
