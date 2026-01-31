@@ -9,10 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add<ClearEnquiryCacheFilter>();
-});
+builder.Services.AddControllersWithViews();
 
 // Session
 builder.Services.AddSession(options =>
@@ -24,6 +21,8 @@ builder.Services.AddSession(options =>
 
 // MongoDB
 builder.Services.AddSingleton<MongoContext>();
+
+builder.Services.AddScoped<ClearEnquiryCacheFilter>();
 
 builder.Services.AddScoped<CounterRepository>();
 builder.Services.AddScoped<UserRepository>();

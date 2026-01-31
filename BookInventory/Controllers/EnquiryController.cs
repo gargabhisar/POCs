@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BookInventory.Controllers
 {
     [AuthorizeRole("Admin")]
+    [ServiceFilter(typeof(ClearEnquiryCacheFilter))]
     public class EnquiryController : Controller
     {
         private readonly EnquiryRepository _repo;
