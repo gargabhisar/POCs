@@ -19,9 +19,11 @@
                placeholder="Search by name, mobile, email, comments" />
     </div>
 
-    <div class="col-md-2">
+    <div class="col-md-4">
         <button class="btn btn-primary">Search</button>
         <a asp-action="List" class="btn btn-secondary ms-1">Clear</a>
+        <!-- 📤 EXPORT BUTTON -->
+        <a asp-action="Export" asp-route-search="@search" class="btn btn-success ms-2">Export to Excel</a>
     </div>
 </form>
 
