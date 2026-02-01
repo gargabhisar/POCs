@@ -44,7 +44,7 @@ namespace BookInventory.Controllers
 
             _repo.Insert(enquiry);
 
-            TempData["Success"] = "Enquiry saved successfully.";
+            TempData["Success"] = $"Enquiry No. {enquiry.SerialNo} for {enquiry.Name} saved successfully.";
             return RedirectToAction("Create");
         }
 
