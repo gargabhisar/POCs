@@ -47,25 +47,6 @@
                             Mobile number must be exactly 10 digits.
                         </div>
                     </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">
-                                Payment Mode <span class="text-danger">*</span>
-                            </label>
-
-                            <select asp-for="PaymentMode"
-                                    class="form-select"
-                                    id="paymentMode"
-                                    required>
-                                <option value="">-- Select --</option>
-                                <option value="Cash">Cash</option>
-                                <option value="Online">Online</option>
-                                <option value="NA">N/A</option>
-                            </select>
-                        </div>
-                    </div>
-
                 </div>
 
                 <hr />
@@ -98,6 +79,24 @@
                         Grand Total:
                         ₹ <span id="grandTotal">0</span>
                     </h5>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Payment Mode <span class="text-danger">*</span>
+                        </label>
+
+                        <select asp-for="PaymentMode"
+                                class="form-select"
+                                id="paymentMode"
+                                required>
+                            <option value="">-- Select --</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Online">Online</option>
+                            <option value="NA">N/A</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-success">
