@@ -22,10 +22,10 @@ namespace BookInventory.Models
         public string BookId { get; set; }
         public string Title { get; set; }
         public int MRP { get; set; }
-        public decimal DiscountPercent { get; set; }
+        public int DiscountPercent { get; set; }   // integer only
         public int Quantity { get; set; }
-        public decimal FinalPrice => MRP - (MRP * DiscountPercent / 100);
-        public decimal LineTotal => FinalPrice * Quantity;
+        public int FinalPrice { get; set; }         // rounded value
+        public int LineTotal { get; set; }          // FinalPrice * Quantity
         public string Remark { get; set; }
     }
 }

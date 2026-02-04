@@ -120,7 +120,6 @@ namespace BookInventory.Services
                                            c.Item().Text("Invoice To:\n").Bold();
                                            c.Item().Text($"Name: {invoice.CustomerName}");
                                            c.Item().Text($"Mobile No: {invoice.CustomerMobile}");
-                                           c.Item().Text($"Payment Mode: {invoice.PaymentMode}");
                                        });
 
                                     row.ConstantItem(220)
@@ -130,9 +129,10 @@ namespace BookInventory.Services
                                        .Padding(10)
                                        .Column(c =>
                                        {
-                                           c.Item().Text($"Invoice No: INV-{invoice.InvoiceNo:D4}")
-                                               .Bold();
+                                           c.Item().Text($"Invoice No: INV-{invoice.InvoiceNo:D4}").Bold();
                                            c.Item().Text($"Date: {invoice.InvoiceDate:dd-MM-yyyy}");
+                                           c.Item().Text("\n").Bold();
+                                           c.Item().Text($"Payment Mode: {invoice.PaymentMode}");
                                        });
                                 });
 
