@@ -246,6 +246,9 @@ namespace BookInventory.Services
                 "inkquills-logo.png"
             );
 
+            var grandQty = bookSales.Sum(x => x.Quantity);
+            var grandAmount = bookSales.Sum(x => x.SoldAt * x.Quantity);
+
             return Document.Create(container =>
             {
                 container.Page(page =>
@@ -255,12 +258,12 @@ namespace BookInventory.Services
                     page.Background(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(10));
 
-                    // Outer dynamic border (same as invoice)
                     page.Content().Column(pageCol =>
                     {
+                        // 🔲 OUTER DYNAMIC BORDER
                         pageCol.Item()
                             .Border(1)
-                            .BorderColor(Colors.Grey.Lighten2)
+                            .BorderColor(Colors.Grey.Medium)
                             .Padding(10)
                             .Column(col =>
                             {
@@ -271,13 +274,11 @@ namespace BookInventory.Services
                                    .Padding(10)
                                    .Row(row =>
                                    {
-                                       // LOGO
                                        row.ConstantItem(120)
                                            .AlignMiddle()
                                            .Image(logoPath)
                                            .FitWidth();
 
-                                       // ADDRESS + CONTACT (CENTER)
                                        row.RelativeItem()
                                            .AlignMiddle()
                                            .AlignCenter()
@@ -295,7 +296,6 @@ namespace BookInventory.Services
                                                    .FontColor(Colors.Grey.Darken1);
                                            });
 
-                                       // REPORT TITLE (RIGHT)
                                        row.ConstantItem(120)
                                            .AlignRight()
                                            .Column(c =>
@@ -305,8 +305,8 @@ namespace BookInventory.Services
                                                    .Bold()
                                                    .FontColor(Colors.Blue.Darken2);
 
-                                               c.Item().Text($"Generated: {DateTime.Now:dd-MM-yyyy}")
-                                                   .FontSize(9);
+                                               c.Item().Text($"GSTIN: {GSTIN}").FontSize(9);
+                                               c.Item().Text($"PAN: {PAN}").FontSize(9);
                                            });
                                    });
 
@@ -319,57 +319,85 @@ namespace BookInventory.Services
                                    {
                                        table.ColumnsDefinition(columns =>
                                        {
-                                           columns.ConstantColumn(55);  // Invoice
+                                           columns.ConstantColumn(45);  // Invoice
                                            columns.ConstantColumn(70);  // Date
                                            columns.RelativeColumn(3);   // Book
                                            columns.ConstantColumn(40);  // Qty
                                            columns.ConstantColumn(50);  // MRP
-                                           columns.ConstantColumn(60);  // Discount
+                                           columns.ConstantColumn(50);  // Disc
                                            columns.ConstantColumn(60);  // Sold At
                                            columns.RelativeColumn(2);   // Payment
                                            columns.RelativeColumn(3);   // Remark
                                        });
 
+                                       // HEADER
                                        table.Header(h =>
                                        {
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Invoice").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Date").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Book").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Qty").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("MRP").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Disc %").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Sold At").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Payment").Bold();
-                                           h.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Remark").Bold();
+                                           void HeaderCell(string text) =>
+                                               h.Cell()
+                                                .Border(1)
+                                                .Background(Colors.Grey.Lighten3)
+                                                .Padding(5)
+                                                .Text(text)
+                                                .Bold();
+
+                                           HeaderCell("Inv");
+                                           HeaderCell("Date");
+                                           HeaderCell("Book");
+                                           HeaderCell("Qty");
+                                           HeaderCell("MRP");
+                                           HeaderCell("Disc%");
+                                           HeaderCell("Sold At");
+                                           HeaderCell("Payment");
+                                           HeaderCell("Remark");
                                        });
 
+                                       // ROWS
                                        foreach (var r in bookSales)
                                        {
-                                           table.Cell().Padding(5).Text(r.InvoiceNo);
-                                           table.Cell().Padding(5).Text(r.InvoiceDate.ToString("dd-MM-yyyy"));
-                                           table.Cell().Padding(5).Text(r.BookName);
-                                           table.Cell().Padding(5).Text(r.Quantity.ToString());
-                                           table.Cell().Padding(5).Text($"₹ {r.MRP}");
-                                           table.Cell().Padding(5).Text($"{r.DiscountPercent}%");
-                                           table.Cell().Padding(5).Text($"₹ {r.SoldAt}");
-                                           table.Cell().Padding(5).Text(r.PaymentMode);
-                                           table.Cell().Padding(5).Text(r.Remark ?? "");
+                                           void Cell(string text) =>
+                                               table.Cell()
+                                                    .Border(1)
+                                                    .Padding(5)
+                                                    .Text(text);
+
+                                           Cell(r.InvoiceNo.ToString());
+                                           Cell(r.InvoiceDate.ToString("dd-MM-yyyy"));
+                                           Cell(r.BookName);
+                                           Cell(r.Quantity.ToString());
+                                           Cell($"₹{r.MRP}");
+                                           Cell($"{r.DiscountPercent}%");
+                                           Cell($"₹{r.SoldAt}");
+                                           Cell(r.PaymentMode);
+                                           Cell(r.Remark ?? "");
                                        }
                                    });
 
+                                // ================= TOTALS =================
+                                col.Item().PaddingTop(10)
+                                   .Border(1)
+                                   .BorderColor(Colors.Grey.Lighten2)
+                                   .Padding(10)
+                                   .AlignRight()
+                                   .Column(c =>
+                                   {
+                                       c.Item().Text($"Total Quantity Sold: {grandQty}");
+                                       c.Item().LineHorizontal(1);
+                                       c.Item().Text($"Total Sales Amount: ₹ {grandAmount:0.00}")
+                                           .FontSize(13)
+                                           .Bold();
+                                   });
+
                                 // ================= FOOTER =================
-                                col.Item().PaddingTop(15).AlignCenter().Column(c =>
-                                {
-                                    c.Item()
-                                        .Border(1)
-                                        .BorderColor(Colors.Grey.Lighten2)
-                                        .Padding(6)
-                                        .AlignCenter()
-                                        .Text("This is a computer generated report.")
-                                        .FontSize(9)
-                                        .Italic()
-                                        .FontColor(Colors.Grey.Darken1);
-                                });
+                                col.Item().PaddingTop(12)
+                                   .AlignCenter()
+                                   .Border(1)
+                                   .BorderColor(Colors.Grey.Lighten2)
+                                   .Padding(6)
+                                   .Text("This is a system generated sales report.")
+                                   .FontSize(9)
+                                   .Italic()
+                                   .FontColor(Colors.Grey.Darken1);
                             });
                     });
                 });
