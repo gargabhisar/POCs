@@ -241,7 +241,7 @@ namespace BookInventory.Controllers
             HttpContext.Session.Set("LastInvoicePdf", pdfBytes);
             HttpContext.Session.SetString("LastInvoiceFileName", fileName);
 
-            TempData["Success"] = "Publishing invoice saved successfully.";
+            TempData["Success"] = $"Publishing Invoice No. {invoice.InvoiceNo} generated successfully.";
 
             return RedirectToAction("CreatePublishing", new { download = 1 });
         }
