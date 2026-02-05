@@ -20,6 +20,45 @@ namespace BookInventory.Services
         public List<Invoice> GetAll() => _repo.GetAll();
 
         public Invoice Get(string id) => _repo.GetById(id);
+
+        public List<BookSales> GetAll(string bookTitle = null)
+        {
+            var invoices = _repo.GetAll().OrderBy(x=>x.InvoiceNo).ToList();
+
+            var rows = invoices
+                .SelectMany(inv => inv.Items.Select(item => new BookSales
+                {
+                    InvoiceNo = inv.InvoiceNo,
+                    InvoiceDate = inv.InvoiceDate,
+                    BookName = item.Title,
+                    Quantity = item.Quantity,
+                    MRP = item.MRP,
+                    DiscountPercent = item.DiscountPercent,
+                    SoldAt = item.FinalPrice,
+                    PaymentMode = inv.PaymentMode,
+                    Remark = item.Remark
+                }))
+                .ToList();
+
+            if (!string.IsNullOrWhiteSpace(bookTitle))
+            {
+                rows = rows
+                    .Where(r => r.BookName == bookTitle)
+                    .ToList();
+            }
+
+            return rows;
+        }
+
+        public List<string> GetBooksInInvoices()
+        {
+            return _repo.GetAll()
+                .SelectMany(i => i.Items)
+                .Select(i => i.Title)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+        }
     }
 
 }

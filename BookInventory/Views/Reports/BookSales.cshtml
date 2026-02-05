@@ -1,0 +1,135 @@
+﻿@model List<BookInventory.Models.BookSales>
+
+@{
+    ViewBag.Title = "Book Sales Report";
+    var bookList = ViewBag.BookList as List<string>;
+    var selectedBook = ViewBag.SelectedBook as string;
+}
+
+<div class="container mt-4">
+
+    <h4 class="mb-3">📘 Book Sales Report</h4>
+
+    <!-- FILTER BAR -->
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <select name="book" class="form-select" onchange="this.form.submit()">
+                <option value="">-- All Books --</option>
+                @foreach (var b in bookList)
+                {
+                    <option value="@b" selected="@(b == selectedBook)">
+                        @b
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <input type="text"
+                   id="searchInput"
+                   class="form-control"
+                   placeholder="Search invoice / payment / remark..."
+                   onkeyup="applySearch()" />
+        </div>
+
+        <div class="col-md-4 text-end">
+            <a class="btn btn-outline-danger"
+               href="@Url.Action("BookSalesPdf", new { book = selectedBook })">
+                ⬇ Export PDF
+            </a>
+        </div>
+    </form>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm" id="salesTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Invoice No</th>
+                    <th>Date</th>
+                    <th>Book</th>
+                    <th>Qty</th>
+                    <th>MRP</th>
+                    <th>Discount %</th>
+                    <th>Sold At</th>
+                    <th>Payment</th>
+                    <th>Remark</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>@r.InvoiceNo</td>
+                        <td>@r.InvoiceDate.ToString("dd-MM-yyyy")</td>
+                        <td>@r.BookName</td>
+                        <td>@r.Quantity</td>
+                        <td>₹ @r.MRP</td>
+                        <td>@r.DiscountPercent %</td>
+                        <td>₹ @r.SoldAt</td>
+                        <td>@r.PaymentMode</td>
+                        <td>@r.Remark</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+
+</div>
+
+@section Scripts {
+    <script>
+        const rowsPerPage = 10;
+        let currentPage = 1;
+
+        const tableBody = document.getElementById("tableBody");
+        const allRows = Array.from(tableBody.rows);
+        let filteredRows = [...allRows];
+        const pagination = document.getElementById("pagination");
+
+        function renderTable() {
+            tableBody.innerHTML = "";
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            filteredRows.slice(start, end).forEach(r => tableBody.appendChild(r));
+            renderPagination();
+        }
+
+        function renderPagination() {
+            pagination.innerHTML = "";
+            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+
+            for (let i = 1; i <= pageCount; i++) {
+                const li = document.createElement("li");
+                li.className = "page-item " + (i === currentPage ? "active" : "");
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                };
+                pagination.appendChild(li);
+            }
+        }
+
+        function applySearch() {
+            const q = document.getElementById("searchInput").value.toLowerCase();
+
+            filteredRows = allRows.filter(r =>
+                r.innerText.toLowerCase().includes(q)
+            );
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Initial load
+        renderTable();
+    </script>
+}
