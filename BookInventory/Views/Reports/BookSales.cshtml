@@ -45,15 +45,15 @@
         <table class="table table-bordered table-sm" id="salesTable">
             <thead class="table-light">
                 <tr>
-                    <th>Invoice No</th>
-                    <th>Date</th>
-                    <th>Book</th>
-                    <th>Qty</th>
-                    <th>MRP</th>
-                    <th>Discount %</th>
-                    <th>Sold At</th>
-                    <th>Payment</th>
-                    <th>Remark</th>
+                    <th onclick="sortTable(0)">Invoice No <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(1)">Date <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(2)">Book <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(3)">Qty <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(4)">MRP <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(5)">Discount % <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(6)">Sold At <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(7)">Payment <span class="sort-icon"></span></th>
+                    <th onclick="sortTable(8)">Remark <span class="sort-icon"></span></th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -81,11 +81,32 @@
     </nav>
 
 </div>
+<style>
+    th {
+        cursor: pointer;
+        user-select: none;
+    }
 
+    .sort-icon {
+        font-size: 0.8em;
+        margin-left: 4px;
+        color: #999;
+    }
+
+    .sort-asc::after {
+        content: " ▲";
+    }
+
+    .sort-desc::after {
+        content: " ▼";
+    }
+</style>
 @section Scripts {
     <script>
         const rowsPerPage = 10;
         let currentPage = 1;
+        let sortColumnIndex = null;
+        let sortDirection = "asc";
 
         const tableBody = document.getElementById("tableBody");
         const allRows = Array.from(tableBody.rows);
@@ -124,6 +145,53 @@
             filteredRows = allRows.filter(r =>
                 r.innerText.toLowerCase().includes(q)
             );
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function sortTable(colIndex) {
+            // Toggle direction
+            if (sortColumnIndex === colIndex) {
+                sortDirection = sortDirection === "asc" ? "desc" : "asc";
+            } else {
+                sortColumnIndex = colIndex;
+                sortDirection = "asc";
+            }
+
+            // Reset icons
+            document.querySelectorAll(".sort-icon").forEach(i => {
+                i.className = "sort-icon";
+            });
+
+            const header = document.querySelectorAll("th")[colIndex];
+            const icon = header.querySelector(".sort-icon");
+            icon.classList.add(sortDirection === "asc" ? "sort-asc" : "sort-desc");
+
+            filteredRows.sort((a, b) => {
+                let A = a.cells[colIndex].innerText.trim();
+                let B = b.cells[colIndex].innerText.trim();
+
+                // Numeric handling
+                const numA = parseFloat(A.replace(/[₹,%]/g, ""));
+                const numB = parseFloat(B.replace(/[₹,%]/g, ""));
+
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return sortDirection === "asc" ? numA - numB : numB - numA;
+                }
+
+                // Date handling (dd-MM-yyyy)
+                if (A.match(/\d{2}-\d{2}-\d{4}/)) {
+                    const dA = new Date(A.split("-").reverse().join("-"));
+                    const dB = new Date(B.split("-").reverse().join("-"));
+                    return sortDirection === "asc" ? dA - dB : dB - dA;
+                }
+
+                // String fallback
+                return sortDirection === "asc"
+                    ? A.localeCompare(B)
+                    : B.localeCompare(A);
+            });
 
             currentPage = 1;
             renderTable();
