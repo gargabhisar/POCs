@@ -12,7 +12,7 @@
 
     <!-- FILTER BAR -->
     <form method="get" class="row g-2 mb-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <select name="book" class="form-select" onchange="this.form.submit()">
                 <option value="">-- All Books --</option>
                 @foreach (var b in bookList)
@@ -24,16 +24,26 @@
             </select>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <input type="text"
                    id="searchInput"
                    class="form-control"
                    placeholder="Search invoice / payment / remark..."
-                   onkeyup="applySearch()" />
+                   onkeyup="applyFilters()" />
         </div>
 
-        <div class="col-md-4 text-end">
-            <a id="exportPdfBtn" class="btn btn-outline-danger"
+        <div class="col-md-3">
+            <select id="paymentFilter" class="form-select" onchange="applyFilters()">
+                <option value="">-- All Payment Modes --</option>
+                <option value="Cash">Cash</option>
+                <option value="Online">Online</option>
+                <option value="NA">N/A</option>
+            </select>
+        </div>
+
+        <div class="col-md-3 text-end">
+            <a id="exportPdfBtn"
+               class="btn btn-outline-danger"
                href="@Url.Action("BookSalesPdf", new { book = selectedBook })">
                 ⬇ Export PDF
             </a>
@@ -81,6 +91,7 @@
     </nav>
 
 </div>
+
 <style>
     th {
         cursor: pointer;
@@ -101,6 +112,7 @@
         content: " ▼";
     }
 </style>
+
 @section Scripts {
     <script>
         const rowsPerPage = 10;
@@ -108,6 +120,8 @@
 
         let sortColumnIndex = null;
         let sortDirection = "asc";
+
+        let selectedPaymentMode = "";
 
         const tableBody = document.getElementById("tableBody");
         const allRows = Array.from(tableBody.rows);
@@ -142,21 +156,27 @@
             }
         }
 
-        function applySearch() {
+        function applyFilters() {
+            const payment = document.getElementById("paymentFilter").value.toLowerCase();
             const q = document.getElementById("searchInput").value.toLowerCase();
 
-            filteredRows = allRows.filter(r =>
-                r.innerText.toLowerCase().includes(q)
-            );
+            filteredRows = allRows.filter(r => {
+                const rowText = r.innerText.toLowerCase();
+                const paymentCell = r.cells[7].innerText.toLowerCase(); // Payment column
+
+                const matchesSearch = rowText.includes(q);
+                const matchesPayment = !payment || paymentCell === payment;
+
+                return matchesSearch && matchesPayment;
+            });
 
             currentPage = 1;
             renderTable();
-
-            updateExportLink();
+            updateExportLink(); // 🔑 keep export in sync
         }
 
+
         function sortTable(colIndex) {
-            // Toggle direction
             if (sortColumnIndex === colIndex) {
                 sortDirection = sortDirection === "asc" ? "desc" : "asc";
             } else {
@@ -164,13 +184,11 @@
                 sortDirection = "asc";
             }
 
-            // Reset icons
-            document.querySelectorAll(".sort-icon").forEach(i => {
-                i.className = "sort-icon";
-            });
+            document.querySelectorAll(".sort-icon").forEach(i => i.className = "sort-icon");
 
-            const header = document.querySelectorAll("th")[colIndex];
-            const icon = header.querySelector(".sort-icon");
+            const icon = document.querySelectorAll("th")[colIndex]
+                .querySelector(".sort-icon");
+
             icon.classList.add(sortDirection === "asc" ? "sort-asc" : "sort-desc");
 
             filteredRows.sort((a, b) => {
@@ -197,16 +215,20 @@
 
             currentPage = 1;
             renderTable();
-
-            // ✅ IMPORTANT
             updateExportLink();
         }
 
         function updateExportLink() {
             const baseUrl = "@Url.Action("BookSalesPdf")";
             const book = "@selectedBook";
+            const paymentMode =
+                document.getElementById("paymentFilter")?.value ?? "";
 
             let url = `${baseUrl}?book=${encodeURIComponent(book ?? "")}`;
+
+            if (paymentMode) {
+                url += `&paymentMode=${encodeURIComponent(paymentMode)}`;
+            }
 
             if (sortColumnIndex !== null) {
                 url += `&sortColumnIndex=${sortColumnIndex}&sortDirection=${sortDirection}`;
@@ -215,7 +237,9 @@
             exportBtn.href = url;
         }
 
+
         // Initial load
         renderTable();
+        updateExportLink();
     </script>
 }
