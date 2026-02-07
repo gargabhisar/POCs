@@ -33,7 +33,7 @@
         </div>
 
         <div class="col-md-4 text-end">
-            <a class="btn btn-outline-danger"
+            <a id="exportPdfBtn" class="btn btn-outline-danger"
                href="@Url.Action("BookSalesPdf", new { book = selectedBook })">
                 ⬇ Export PDF
             </a>
@@ -105,13 +105,16 @@
     <script>
         const rowsPerPage = 10;
         let currentPage = 1;
+
         let sortColumnIndex = null;
         let sortDirection = "asc";
 
         const tableBody = document.getElementById("tableBody");
         const allRows = Array.from(tableBody.rows);
         let filteredRows = [...allRows];
+
         const pagination = document.getElementById("pagination");
+        const exportBtn = document.getElementById("exportPdfBtn");
 
         function renderTable() {
             tableBody.innerHTML = "";
@@ -148,6 +151,8 @@
 
             currentPage = 1;
             renderTable();
+
+            updateExportLink();
         }
 
         function sortTable(colIndex) {
@@ -172,7 +177,6 @@
                 let A = a.cells[colIndex].innerText.trim();
                 let B = b.cells[colIndex].innerText.trim();
 
-                // Numeric handling
                 const numA = parseFloat(A.replace(/[₹,%]/g, ""));
                 const numB = parseFloat(B.replace(/[₹,%]/g, ""));
 
@@ -180,14 +184,12 @@
                     return sortDirection === "asc" ? numA - numB : numB - numA;
                 }
 
-                // Date handling (dd-MM-yyyy)
                 if (A.match(/\d{2}-\d{2}-\d{4}/)) {
                     const dA = new Date(A.split("-").reverse().join("-"));
                     const dB = new Date(B.split("-").reverse().join("-"));
                     return sortDirection === "asc" ? dA - dB : dB - dA;
                 }
 
-                // String fallback
                 return sortDirection === "asc"
                     ? A.localeCompare(B)
                     : B.localeCompare(A);
@@ -195,6 +197,22 @@
 
             currentPage = 1;
             renderTable();
+
+            // ✅ IMPORTANT
+            updateExportLink();
+        }
+
+        function updateExportLink() {
+            const baseUrl = "@Url.Action("BookSalesPdf")";
+            const book = "@selectedBook";
+
+            let url = `${baseUrl}?book=${encodeURIComponent(book ?? "")}`;
+
+            if (sortColumnIndex !== null) {
+                url += `&sortColumnIndex=${sortColumnIndex}&sortDirection=${sortDirection}`;
+            }
+
+            exportBtn.href = url;
         }
 
         // Initial load

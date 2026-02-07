@@ -23,13 +23,17 @@ namespace BookInventory.Controllers
             return View(data);
         }
 
-        public IActionResult BookSalesPdf(string book)
+        public IActionResult BookSalesPdf(string book, int sortColumnIndex = -1, string sortDirection = "asc")
         {
             var data = _invoiceService.GetAll(book);
+
+            // apply sorting ONLY if UI sorted
+            if (sortColumnIndex >= 0)
+                data = _invoiceService.SortBookSales(data, sortColumnIndex, sortDirection);
 
             var pdfBytes = _pdfService.GenerateBookSalesInvoicePdf(data);
 
             return File(pdfBytes, "application/pdf", $"BookSales_{book ?? "All"}_{DateTime.Now:yyyyMMdd}.pdf");
-        }
+        }        
     }
 }
