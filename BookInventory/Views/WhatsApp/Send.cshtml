@@ -1,0 +1,32 @@
+﻿<h2>Send WhatsApp Messages</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label>Template Name</label>
+        <input type="text"
+               name="templateName"
+               class="form-control"
+               placeholder="hello_world"
+               required />
+    </div>
+
+    <br />
+
+    <button class="btn btn-primary" type="submit">
+        Send Messages
+    </button>
+</form>
+
+@if (ViewBag.Success != null)
+{
+    <div class="alert alert-success mt-3">
+        @ViewBag.Success
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mt-3">
+        @ViewBag.Error
+    </div>
+}
