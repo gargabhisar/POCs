@@ -23,16 +23,16 @@ namespace BookInventory.Controllers
         [HttpGet]
         public IActionResult Verify()
         {
-            var mode = Request.Query["hub_mode"].ToString();
-            var token = Request.Query["hub_verify_token"].ToString();
-            var challenge = Request.Query["hub_challenge"].ToString();
+            var mode = Request.Query["hub.mode"].ToString();
+            var token = Request.Query["hub.verify_token"].ToString();
+            var challenge = Request.Query["hub.challenge"].ToString();
 
             if (mode == "subscribe" && token == VERIFY_TOKEN)
             {
                 return Content(challenge, "text/plain");
             }
 
-            return Unauthorized();
+            return StatusCode(403);
         }
 
         // ===============================
