@@ -1,4 +1,5 @@
-﻿using BookInventory.Models;
+﻿using BookInventory.Data;
+using BookInventory.Models;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.Text.Json;
@@ -7,13 +8,13 @@ namespace BookInventory.Controllers
 {
     [Route("whatsapp-webhook")]
     public class WhatsAppWebhookController : Controller
-    {
-        private readonly IMongoCollection<WhatsAppResponseLog> _logs;
+    {        
         private const string VERIFY_TOKEN = "inkquills_verify_token";
+        private readonly IMongoCollection<WhatsAppResponseLog> _logs;
 
-        public WhatsAppWebhookController(IMongoDatabase database)
+        public WhatsAppWebhookController(MongoContext context)
         {
-            _logs = database.GetCollection<WhatsAppResponseLog>("WhatsAppResponseLogs");
+            _logs = context.Database.GetCollection<WhatsAppResponseLog>("WhatsAppResponseLogs");
         }
 
         // ===============================
@@ -31,30 +32,16 @@ namespace BookInventory.Controllers
                 return Content(challenge, "text/plain");
             }
 
-            return Forbid();
+            return Unauthorized();
         }
 
         // ===============================
         // RECEIVE EVENTS (POST)
-        // LOG TO FILE + UPDATE MONGODB
+        // UPDATE MONGODB
         // ===============================
         [HttpPost]
         public async Task<IActionResult> Receive([FromBody] JsonElement payload)
         {
-            // 1️⃣ Log raw payload to file (always)
-            try
-            {
-                var raw = JsonSerializer.Serialize(payload);
-                System.IO.File.AppendAllText(
-                    Path.Combine(AppContext.BaseDirectory, "whatsapp-webhook.log"),
-                    DateTime.UtcNow + " " + raw + Environment.NewLine
-                );
-            }
-            catch
-            {
-                // Ignore logging failures
-            }
-
             try
             {
                 var value = payload
