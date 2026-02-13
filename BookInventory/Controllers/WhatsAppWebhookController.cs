@@ -44,29 +44,30 @@ namespace BookInventory.Controllers
         {
             try
             {
-                var value = payload
-                    .GetProperty("entry")[0]
-                    .GetProperty("changes")[0]
-                    .GetProperty("value");
+                // 1️⃣ entry[]
+                if (!payload.TryGetProperty("entry", out var entry) || entry.GetArrayLength() == 0)
+                    return Ok();
 
-                // 2️⃣ Ignore incoming user messages (for now)
+                var changes = entry[0].GetProperty("changes");
+                if (changes.GetArrayLength() == 0)
+                    return Ok();
+
+                var value = changes[0].GetProperty("value");
+
+                // 2️⃣ Ignore incoming messages (for now)
                 if (value.TryGetProperty("messages", out _))
-                {
                     return Ok();
-                }
 
-                // 3️⃣ Process delivery/read statuses
-                if (!value.TryGetProperty("statuses", out var statuses))
-                {
+                // 3️⃣ Process statuses only
+                if (!value.TryGetProperty("statuses", out var statuses) || statuses.GetArrayLength() == 0)
                     return Ok();
-                }
 
                 var status = statuses[0];
 
                 var waMessageId = status.GetProperty("id").GetString();
                 var deliveryStatus = status.GetProperty("status").GetString();
 
-                if (string.IsNullOrWhiteSpace(waMessageId))
+                if (string.IsNullOrWhiteSpace(waMessageId) || string.IsNullOrWhiteSpace(deliveryStatus))
                     return Ok();
 
                 var update = Builders<WhatsAppResponseLog>.Update
@@ -80,7 +81,7 @@ namespace BookInventory.Controllers
             }
             catch
             {
-                // Never fail webhook
+                // 🔒 Never crash webhook
             }
 
             return Ok();
