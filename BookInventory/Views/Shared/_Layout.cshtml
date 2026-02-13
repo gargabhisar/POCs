@@ -150,28 +150,59 @@
                     </ul>
 
                     <!-- RIGHT MENU -->
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-3">
 
                         @if (user != null)
                         {
-                            <span class="text-muted small">
-                                @user.Email (@user.Role)
-                            </span>
+                            <!-- PROFILE DROPDOWN -->
+                            <div class="dropdown">
 
-                            <a class="btn btn-outline-danger btn-sm"
-                               asp-controller="Account"
-                               asp-action="Logout">
-                                Logout
-                            </a>
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    👤 @user.Email
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                                    <!-- USER INFO -->
+                                    <li class="px-3 py-2">
+                                        <div class="fw-semibold">@user.Email</div>
+
+                                        <span class="badge
+                            @(user.Role == "Admin" ? "bg-danger" : "bg-secondary")">
+                                            @user.Role
+                                        </span>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <!-- ADMIN ONLY -->
+                                    @if (user.Role == "Admin")
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Account"
+                                               asp-action="Register">
+                                                ➕ Create User
+                                            </a>
+                                        </li>
+                                    }
+
+                                    <!-- LOGOUT -->
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           asp-controller="Account"
+                                           asp-action="Logout">
+                                            🚪 Logout
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         }
 
-                        @if (SessionHelper.GetUser(Context)?.Role == "Admin")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Users/Create">Create User</a>
-                            </li>
-                        }
-
+                        <!-- THEME TOGGLE -->
                         <button class="btn btn-outline-secondary btn-sm"
                                 type="button"
                                 onclick="toggleTheme()"
@@ -180,6 +211,7 @@
                         </button>
 
                     </div>
+
 
                 </div>
             </div>

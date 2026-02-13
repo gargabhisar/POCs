@@ -58,22 +58,25 @@ namespace BookInventory.Controllers
         [AuthorizeRole("Admin")]
         public IActionResult Register()
         {
+            ViewBag.Roles = new List<string> { "Admin", "Viewer" };
             return View();
         }
 
         [HttpPost]
         [AuthorizeRole("Admin")]
-        public IActionResult Register(string name, string email, string password)
+        public IActionResult Register(string name, string email, string password, string role)
         {
             if (string.IsNullOrWhiteSpace(name) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password))
+            string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(password) ||
+            string.IsNullOrWhiteSpace(role))
             {
                 ViewBag.Error = "All fields are required";
+                ViewBag.Roles = new List<string> { "Admin", "Viewer" };
                 return View();
             }
 
-            var success = _authService.Register(name, email, password);
+            var success = _authService.Register(name, email, password, role);
 
             if (!success)
             {
@@ -81,8 +84,8 @@ namespace BookInventory.Controllers
                 return View();
             }
 
-            TempData["Success"] = "Registration successful. Please login.";
-            return RedirectToAction("Login");
+            TempData["UserCreateSuccess"] = $"User '{name}' created as {role}";
+            return RedirectToAction("Register", "Account");
         }
     }
 }

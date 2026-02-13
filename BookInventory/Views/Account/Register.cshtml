@@ -1,18 +1,40 @@
-﻿<div class="container mt-5 col-md-4">
+﻿<h4>Create User</h4>
 
-    <h4 class="mb-3">Register</h4>
+@if (TempData["UserCreateSuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["UserCreateSuccess"]</div>
+}
 
-    @if (ViewBag.Error != null)
-    {
-        <div class="alert alert-danger">@ViewBag.Error</div>
-    }
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
 
-    <form method="post">
-        <input name="name" class="form-control mb-2" placeholder="Full Name" required />
-        <input name="email" type="email" class="form-control mb-2" placeholder="Email" required />
-        <input name="password" type="password" class="form-control mb-3" placeholder="Password" required />
+<form method="post">
+    <div class="mb-2">
+        <label>Name</label>
+        <input class="form-control" name="name" required />
+    </div>
 
-        <button class="btn btn-primary w-100">Register</button>
-    </form>
+    <div class="mb-2">
+        <label>Email</label>
+        <input class="form-control" name="email" type="email" required />
+    </div>
 
-</div>
+    <div class="mb-2">
+        <label>Password</label>
+        <input class="form-control" name="password" type="password" required />
+    </div>
+
+    <div class="mb-3">
+        <label>Role</label>
+        <select class="form-select" name="role" required>
+            @foreach (var r in ViewBag.Roles)
+            {
+                <option value="@r">@r</option>
+            }
+        </select>
+    </div>
+
+    <button class="btn btn-primary">Create User</button>
+</form>

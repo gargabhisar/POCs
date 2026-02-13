@@ -16,7 +16,7 @@ namespace BookInventory.Services
         }
 
         // ✅ Registration
-        public bool Register(string name, string email, string password)
+        public bool Register(string name, string email, string password, string role)
         {
             if (_repo.GetByEmail(email) != null)
                 return false;
@@ -24,10 +24,13 @@ namespace BookInventory.Services
             var user = new User
             {
                 Name = name,
-                Email = email
+                Email = email,
+                Role = role,
+                IsActive = true,
+                CreatedAt = DateTime.Now
             };
 
-            user.PasswordHash = _hasher.HashPassword(user, password);
+            user.PasswordHash = _hasher.HashPassword(user, password);            
 
             _repo.Insert(user);
             return true;
