@@ -40,15 +40,15 @@ namespace BookInventory.Controllers
                 if (string.IsNullOrWhiteSpace(e.Mobile))
                     continue;
 
-                var (status, response) =
-                    await _whatsAppService.SendTemplateAsync(e.Mobile, templateName);
+                var result = await _whatsAppService.SendTemplateAsync(e.Mobile, templateName);
 
                 await _mongoLogRepository.SaveAsync(new WhatsAppResponseLog
                 {
                     Mobile = e.Mobile,
                     TemplateName = templateName,
-                    HttpStatus = status,
-                    Response = response,
+                    HttpStatus = result.HttpStatus,
+                    Response = result.RawResponse,
+                    WaMessageId = result.WaMessageId, // 🔑 IMPORTANT
                     SentAt = DateTime.UtcNow
                 });
 

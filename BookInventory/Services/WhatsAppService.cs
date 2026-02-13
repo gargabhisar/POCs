@@ -20,7 +20,7 @@ namespace BookInventory.Services
                     config["WhatsApp:AccessToken"]);
         }
 
-        public async Task<(int Status, string Response)>
+        public async Task<WhatsAppSendResult>
             SendTemplateAsync(string mobile, string templateName)
         {
             var url =
@@ -35,7 +35,7 @@ namespace BookInventory.Services
                 template = new
                 {
                     name = templateName,
-                    language = new { code = "en" }
+                    language = new { code = "en_US" }
                 }
             };
 
@@ -45,7 +45,35 @@ namespace BookInventory.Services
             var response = await _http.PostAsync(url, content);
             var body = await response.Content.ReadAsStringAsync();
 
-            return ((int)response.StatusCode, body);
+            string waMessageId = null;
+
+            // 🔑 Safely extract wamid (if present)
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                waMessageId = doc.RootElement.GetProperty("messages")[0].GetProperty("id").GetString();
+            }
+            catch
+            {
+                // Not all responses contain wamid (errors, throttling, etc.)
+            }
+
+            return new WhatsAppSendResult
+            {
+                HttpStatus = (int)response.StatusCode,
+                RawResponse = body,
+                WaMessageId = waMessageId
+            };
         }
+    }
+
+    // ===============================
+    // RESULT DTO (IMPORTANT)
+    // ===============================
+    public class WhatsAppSendResult
+    {
+        public int HttpStatus { get; set; }
+        public string RawResponse { get; set; }
+        public string WaMessageId { get; set; }
     }
 }

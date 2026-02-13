@@ -12,6 +12,9 @@ namespace BookInventory.Models
         public string TemplateName { get; set; }
         public int HttpStatus { get; set; }
         public string Response { get; set; }
+        public string WaMessageId { get; set; } // 🔑 Critical for webhook correlation
+        public string DeliveryStatus { get; set; }  // sent, delivered, read, failed // 📦 Optional but future-ready
+        public DateTime? UpdatedAt { get; set; }
         public DateTime SentAt { get; set; }
     }
 }
