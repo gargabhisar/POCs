@@ -13,13 +13,10 @@ namespace BookInventory.Repositories
             _users = context.Database.GetCollection<User>("Users");
         }
 
-        public User Login(string email, string password)
-        {
-            return _users.Find(x =>
-                x.Email == email &&
-                x.Password == password &&
-                x.IsActive
-            ).FirstOrDefault();
-        }
+        public User GetByEmail(string email) =>
+            _users.Find(u => u.Email == email).FirstOrDefault();
+
+        public void Insert(User user) =>
+            _users.InsertOne(user);
     }
 }

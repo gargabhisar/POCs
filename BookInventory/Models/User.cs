@@ -7,10 +7,11 @@ namespace BookInventory.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
-
-        public string Email { get; set; }
-        public string Password { get; set; }   // Plain text (as requested)
-        public string Role { get; set; }       // Admin | Viewer
-        public bool IsActive { get; set; }
+        public string Name { get; set; }        // ✅ Required for UI
+        public string Email { get; set; }        
+        public string PasswordHash { get; set; } // 🔐 Store HASH, not password
+        public string Role { get; set; } = "Admin";
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

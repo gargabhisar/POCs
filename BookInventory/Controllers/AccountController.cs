@@ -1,4 +1,5 @@
-﻿using BookInventory.Helpers;
+﻿using BookInventory.Filters;
+using BookInventory.Helpers;
 using BookInventory.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,8 +31,7 @@ namespace BookInventory.Controllers
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
-            if (string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 ViewBag.Error = "Email and password are required";
                 return View();
@@ -41,7 +41,7 @@ namespace BookInventory.Controllers
 
             if (user == null)
             {
-                ViewBag.Error = "Invalid credentials or inactive user";
+                ViewBag.Error = "Invalid credentials";
                 return View();
             }
 
@@ -53,6 +53,36 @@ namespace BookInventory.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");
+        }
+
+        [AuthorizeRole("Admin")]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AuthorizeRole("Admin")]
+        public IActionResult Register(string name, string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(name) ||
+                string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(password))
+            {
+                ViewBag.Error = "All fields are required";
+                return View();
+            }
+
+            var success = _authService.Register(name, email, password);
+
+            if (!success)
+            {
+                ViewBag.Error = "User already exists";
+                return View();
+            }
+
+            TempData["Success"] = "Registration successful. Please login.";
+            return RedirectToAction("Login");
         }
     }
 }

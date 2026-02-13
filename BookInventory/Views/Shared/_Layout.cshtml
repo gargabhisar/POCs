@@ -165,6 +165,13 @@
                             </a>
                         }
 
+                        @if (SessionHelper.GetUser(Context)?.Role == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Users/Create">Create User</a>
+                            </li>
+                        }
+
                         <button class="btn btn-outline-secondary btn-sm"
                                 type="button"
                                 onclick="toggleTheme()"
