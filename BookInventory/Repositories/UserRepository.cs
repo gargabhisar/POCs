@@ -18,5 +18,13 @@ namespace BookInventory.Repositories
 
         public void Insert(User user) =>
             _users.InsertOne(user);
+
+        public void Update(User user)
+        {
+            _users.ReplaceOne(
+                x => x.Email == user.Email,
+                user
+            );
+        }
     }
 }

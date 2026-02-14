@@ -13,5 +13,6 @@ namespace BookInventory.Models
         public string Role { get; set; } = "Admin";
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedOn { get; set; } = DateTime.Now;
     }
 }

@@ -8,11 +8,13 @@ namespace BookInventory.Services
     {
         private readonly UserRepository _repo;
         private readonly PasswordHasher<User> _hasher;
+        private readonly string _pepper;
 
-        public AuthService(UserRepository repo)
+        public AuthService(UserRepository repo, IConfiguration config)
         {
             _repo = repo;
             _hasher = new PasswordHasher<User>();
+            _pepper = config["Security:PasswordPepper"];
         }
 
         // ✅ Registration
@@ -30,7 +32,8 @@ namespace BookInventory.Services
                 CreatedAt = DateTime.Now
             };
 
-            user.PasswordHash = _hasher.HashPassword(user, password);            
+            var combined = password + _pepper;
+            user.PasswordHash = _hasher.HashPassword(user, combined);            
 
             _repo.Insert(user);
             return true;
@@ -44,15 +47,40 @@ namespace BookInventory.Services
             if (user == null || !user.IsActive)
                 return null;
 
+            var combined = password + _pepper;
             var result = _hasher.VerifyHashedPassword(
                 user,
                 user.PasswordHash,
-                password
+                combined
             );
 
-            return result == PasswordVerificationResult.Success
-                ? user
-                : null;
+            return result == PasswordVerificationResult.Success ? user : null;
+        }
+
+        public bool VerifyPassword(User user, string inputPassword)
+        {
+            var peppered = inputPassword + _pepper;
+
+            var result = _hasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                peppered
+            );
+
+            return result == PasswordVerificationResult.Success;
+        }
+
+        public void UpdatePassword(string userId, string newPassword)
+        {
+            var user = _repo.GetByEmail(userId);
+            if (user == null) return;
+
+            var peppered = newPassword + _pepper;
+
+            user.PasswordHash = _hasher.HashPassword(user, peppered);
+            user.UpdatedOn = DateTime.Now;
+
+            _repo.Update(user);
         }
     }
 }

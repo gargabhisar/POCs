@@ -1,5 +1,7 @@
 ﻿using BookInventory.Filters;
 using BookInventory.Helpers;
+using BookInventory.Models;
+using BookInventory.Repositories;
 using BookInventory.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +10,12 @@ namespace BookInventory.Controllers
     public class AccountController : Controller
     {
         private readonly AuthService _authService;
+        private readonly UserRepository _userRepository;
 
-        public AccountController(AuthService authService)
+        public AccountController(AuthService authService, UserRepository userRepository)
         {
             _authService = authService;
+            _userRepository = userRepository;
         }
 
         [HttpGet]
@@ -86,6 +90,52 @@ namespace BookInventory.Controllers
 
             TempData["UserCreateSuccess"] = $"User '{name}' created as {role}";
             return RedirectToAction("Register", "Account");
+        }
+
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ChangePassword(ChangePasswordVM model)
+        {
+            var userCheck = SessionHelper.GetUser(HttpContext);
+
+            if (userCheck == null)
+                return RedirectToAction("Login");
+
+            if (string.IsNullOrWhiteSpace(model.OldPassword) ||
+                string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                TempData["Error"] = "All fields are required.";
+                return View(model);
+            }
+
+            if (model.NewPassword != model.ConfirmPassword)
+            {
+                TempData["Error"] = "New passwords do not match.";
+                return View(model);
+            }
+
+            var user = _userRepository.GetByEmail(userCheck.Email);
+
+            // 🔐 Verify old password
+            var result = _authService.VerifyPassword(user, model.OldPassword);
+            if (!result)
+            {
+                TempData["Error"] = "Old password is incorrect.";
+                return View(model);
+            }
+
+            // 🔐 Update password
+            _authService.UpdatePassword(user.Email, model.NewPassword);
+
+            // 🔐 Logout after password change (recommended)
+            SessionHelper.Logout(HttpContext);
+
+            TempData["SuccessPassword"] = "Password changed successfully. Please login again.";
+            return RedirectToAction("Login");
         }
     }
 }
