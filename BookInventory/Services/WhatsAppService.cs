@@ -34,7 +34,7 @@ namespace BookInventory.Services
                 template = new
                 {
                     name = templateName,
-                    language = new { code = "en_US" }
+                    language = new { code = "en" }
                 }
             };
 

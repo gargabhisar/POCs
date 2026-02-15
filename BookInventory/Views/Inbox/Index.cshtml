@@ -1,8 +1,8 @@
 ﻿@using BookInventory.Models
 @{
-    var conversations = ViewBag.Conversations as List<Conversation>;
+    var conversations = ViewBag.Conversations as List<Conversation> ?? new();
     var selected = ViewBag.SelectedConversation as Conversation;
-    var messages = ViewBag.Messages as List<Message>;
+    var messages = ViewBag.Messages as List<Message> ?? new();
 }
 
 <div class="row" style="height:80vh">
@@ -11,13 +11,28 @@
     <div class="col-4 border-end overflow-auto">
         <h5 class="p-2">Inbox</h5>
 
+        @if (!conversations.Any())
+        {
+            <div class="text-muted p-3">
+                No conversations yet
+            </div>
+        }
+
         @foreach (var c in conversations)
         {
-            <a class="d-block p-2 border-bottom text-decoration-none"
+            var displayName =
+            string.IsNullOrWhiteSpace(c.ContactName)
+            ? c.PhoneNumber
+            : c.ContactName;
+
+            <a class="d-block p-2 border-bottom text-decoration-none
+                   @(selected != null && selected.Id == c.Id ? "bg-light" : "")"
                href="/Inbox/Index?conversationId=@c.Id">
 
-                <strong>@c.ContactName ?? c.PhoneNumber</strong><br />
-                <small>@c.LastMessageText</small>
+                <div class="fw-bold">@displayName</div>
+                <small class="text-muted">
+                    @c.LastMessageText
+                </small>
             </a>
         }
     </div>
@@ -33,17 +48,19 @@
         }
         else
         {
+            var headerName =
+            string.IsNullOrWhiteSpace(selected.ContactName)
+            ? selected.PhoneNumber
+            : selected.ContactName;
+
             <div class="border-bottom p-2">
-                <strong>@selected.ContactName</strong><br />
-                <small>@selected.PhoneNumber</small>
+                <strong>@headerName</strong><br />
+                <small class="text-muted">@selected.PhoneNumber</small>
             </div>
 
             <div id="messagesContainer"
                  class="flex-grow-1 overflow-auto p-3">
-                @if (messages != null)
-                {
-                    @await Html.PartialAsync("_Messages", messages)
-                }
+                @await Html.PartialAsync("_Messages", messages)
             </div>
 
             <form method="post"
@@ -69,20 +86,23 @@
         }
     </div>
 </div>
+
 @if (selected != null)
 {
     <script>
         const conversationId = "@selected.Id";
 
         async function refreshMessages() {
-            const res = await fetch(
-                `/Inbox/Messages?conversationId=${conversationId}`
-            );
+            try {
+                const res = await fetch(
+                    `/Inbox/Messages?conversationId=${conversationId}`
+                );
 
-            if (!res.ok) return;
+                if (!res.ok) return;
 
-            const html = await res.text();
-            document.getElementById("messagesContainer").innerHTML = html;
+                const html = await res.text();
+                document.getElementById("messagesContainer").innerHTML = html;
+            } catch { }
         }
 
         // Refresh every 5 seconds
