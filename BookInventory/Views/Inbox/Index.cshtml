@@ -1,0 +1,91 @@
+﻿@using BookInventory.Models
+@{
+    var conversations = ViewBag.Conversations as List<Conversation>;
+    var selected = ViewBag.SelectedConversation as Conversation;
+    var messages = ViewBag.Messages as List<Message>;
+}
+
+<div class="row" style="height:80vh">
+
+    <!-- LEFT: Conversation list -->
+    <div class="col-4 border-end overflow-auto">
+        <h5 class="p-2">Inbox</h5>
+
+        @foreach (var c in conversations)
+        {
+            <a class="d-block p-2 border-bottom text-decoration-none"
+               href="/Inbox/Index?conversationId=@c.Id">
+
+                <strong>@c.ContactName ?? c.PhoneNumber</strong><br />
+                <small>@c.LastMessageText</small>
+            </a>
+        }
+    </div>
+
+    <!-- RIGHT: Messages -->
+    <div class="col-8 d-flex flex-column">
+
+        @if (selected == null)
+        {
+            <div class="text-muted m-auto">
+                Select a conversation
+            </div>
+        }
+        else
+        {
+            <div class="border-bottom p-2">
+                <strong>@selected.ContactName</strong><br />
+                <small>@selected.PhoneNumber</small>
+            </div>
+
+            <div id="messagesContainer"
+                 class="flex-grow-1 overflow-auto p-3">
+                @if (messages != null)
+                {
+                    @await Html.PartialAsync("_Messages", messages)
+                }
+            </div>
+
+            <form method="post"
+                  action="/Inbox/SendReply"
+                  class="border-top p-2">
+
+                <input type="hidden"
+                       name="conversationId"
+                       value="@selected.Id" />
+
+                <div class="input-group">
+                    <input type="text"
+                           name="message"
+                           class="form-control"
+                           placeholder="Type a reply..."
+                           required />
+
+                    <button class="btn btn-success" type="submit">
+                        Send
+                    </button>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+@if (selected != null)
+{
+    <script>
+        const conversationId = "@selected.Id";
+
+        async function refreshMessages() {
+            const res = await fetch(
+                `/Inbox/Messages?conversationId=${conversationId}`
+            );
+
+            if (!res.ok) return;
+
+            const html = await res.text();
+            document.getElementById("messagesContainer").innerHTML = html;
+        }
+
+        // Refresh every 5 seconds
+        setInterval(refreshMessages, 5000);
+    </script>
+}

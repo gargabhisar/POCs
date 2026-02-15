@@ -20,8 +20,7 @@ namespace BookInventory.Services
                     config["WhatsApp:AccessToken"]);
         }
 
-        public async Task<WhatsAppSendResult>
-            SendTemplateAsync(string mobile, string templateName)
+        public async Task<WhatsAppSendResult> SendTemplateAsync(string mobile, string templateName)
         {
             var url =
                 $"https://graph.facebook.com/v22.0/" +
@@ -57,6 +56,50 @@ namespace BookInventory.Services
             {
                 // Not all responses contain wamid (errors, throttling, etc.)
             }
+
+            return new WhatsAppSendResult
+            {
+                HttpStatus = (int)response.StatusCode,
+                RawResponse = body,
+                WaMessageId = waMessageId
+            };
+        }
+
+        public async Task<WhatsAppSendResult> SendTextAsync(string phoneNumber, string text)
+        {
+            var url =
+                $"https://graph.facebook.com/v22.0/" +
+                $"{_config["WhatsApp:PhoneNumberId"]}/messages";
+
+            var payload = new
+            {
+                messaging_product = "whatsapp",
+                to = phoneNumber,
+                type = "text",
+                text = new
+                {
+                    body = text
+                }
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _http.PostAsync(url, content);
+            var body = await response.Content.ReadAsStringAsync();
+
+            string waMessageId = null;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                waMessageId =
+                    doc.RootElement
+                       .GetProperty("messages")[0]
+                       .GetProperty("id")
+                       .GetString();
+            }
+            catch { }
 
             return new WhatsAppSendResult
             {

@@ -11,13 +11,19 @@ namespace BookInventory.Controllers
         private readonly WhatsAppService _whatsAppService;
         private readonly EnquiryRepository _repo;
         private readonly WhatsAppTemplateService _whatsAppTemplateService;
+        private readonly ConversationRepository _conversationRepo;
+        private readonly MessageRepository _messageRepo;
 
-        public WhatsAppController(EnquiryRepository repo, MongoLogRepository mongoLogRepository,WhatsAppService whatsAppService, WhatsAppTemplateService whatsAppTemplateService)
+        public WhatsAppController(EnquiryRepository repo, MongoLogRepository mongoLogRepository, WhatsAppService whatsAppService,
+            WhatsAppTemplateService whatsAppTemplateService, ConversationRepository conversationRepo,
+            MessageRepository messageRepo)
         {
+            _repo = repo;
             _mongoLogRepository = mongoLogRepository;
             _whatsAppService = whatsAppService;
-            _repo= repo;
             _whatsAppTemplateService = whatsAppTemplateService;
+            _conversationRepo = conversationRepo;
+            _messageRepo = messageRepo;
         }
 
         [HttpGet]
@@ -48,6 +54,31 @@ namespace BookInventory.Controllers
 
                 var result = await _whatsAppService.SendTemplateAsync(e.Mobile, templateName);
 
+                // 1️⃣ Conversation
+                var conversation =
+                    await _conversationRepo.GetOrCreateAsync($"91{e.Mobile}");
+
+                // 2️⃣ Store message
+                await _messageRepo.InsertAsync(new Message
+                {
+                    ConversationId = conversation.Id,
+                    Direction = "OUT",
+                    MessageType = "template",
+                    Text = templateName,
+                    TemplateName = templateName,
+                    WaMessageId = result.WaMessageId,
+                    DeliveryStatus = "sent",
+                    Timestamp = DateTime.UtcNow
+                });
+
+                // 3️⃣ Update conversation preview
+                await _conversationRepo.UpdateLastMessageAsync(
+                    conversation.Id,
+                    templateName,
+                    "OUT"
+                );
+
+                // (Optional) keep old log for now
                 await _mongoLogRepository.SaveAsync(new WhatsAppResponseLog
                 {
                     Mobile = e.Mobile,

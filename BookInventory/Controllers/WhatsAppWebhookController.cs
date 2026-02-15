@@ -1,5 +1,6 @@
 ﻿using BookInventory.Data;
 using BookInventory.Models;
+using BookInventory.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.Text.Json;
@@ -11,10 +12,14 @@ namespace BookInventory.Controllers
     {        
         private const string VERIFY_TOKEN = "inkquills_verify_token";
         private readonly IMongoCollection<WhatsAppResponseLog> _logs;
+        private readonly ConversationRepository _conversationRepo;
+        private readonly MessageRepository _messageRepo;
 
-        public WhatsAppWebhookController(MongoContext context)
+        public WhatsAppWebhookController(MongoContext context, ConversationRepository conversationRepo, MessageRepository messageRepo)
         {
             _logs = context.Database.GetCollection<WhatsAppResponseLog>("WhatsAppResponseLogs");
+            _conversationRepo = conversationRepo;
+            _messageRepo = messageRepo;
         }
 
         // ===============================
@@ -37,7 +42,7 @@ namespace BookInventory.Controllers
 
         // ===============================
         // RECEIVE EVENTS (POST)
-        // UPDATE MONGODB
+        // STORE INBOUND + UPDATE DELIVERY
         // ===============================
         [HttpPost]
         public async Task<IActionResult> Receive([FromBody] JsonElement payload)
@@ -54,34 +59,74 @@ namespace BookInventory.Controllers
 
                 var value = changes[0].GetProperty("value");
 
-                // 2️⃣ Ignore incoming messages (for now)
-                if (value.TryGetProperty("messages", out _))
+                // ===============================
+                // 2️⃣ INBOUND USER MESSAGES
+                // ===============================
+                if (value.TryGetProperty("messages", out var messages))
+                {
+                    var message = messages[0];
+
+                    var text =
+                        message.TryGetProperty("text", out var txt)
+                            ? txt.GetProperty("body").GetString()
+                            : "[unsupported message]";
+
+                    var from = message.GetProperty("from").GetString();
+
+                    var contactName =
+                        value.TryGetProperty("contacts", out var contacts)
+                            ? contacts[0].GetProperty("profile").GetProperty("name").GetString()
+                            : null;
+
+                    // 🔑 Conversation
+                    var conversation =
+                        await _conversationRepo.GetOrCreateAsync(from, contactName);
+
+                    // 📩 Store IN message
+                    await _messageRepo.InsertAsync(new Message
+                    {
+                        ConversationId = conversation.Id,
+                        Direction = "IN",
+                        MessageType = "text",
+                        Text = text,
+                        Timestamp = DateTime.UtcNow
+                    });
+
+                    // 🔄 Update conversation preview
+                    await _conversationRepo.UpdateLastMessageAsync(
+                        conversation.Id,
+                        text,
+                        "IN"
+                    );
+
                     return Ok();
+                }
 
-                // 3️⃣ Process statuses only
-                if (!value.TryGetProperty("statuses", out var statuses) || statuses.GetArrayLength() == 0)
+                // ===============================
+                // 3️⃣ DELIVERY / READ STATUS
+                // ===============================
+                if (value.TryGetProperty("statuses", out var statuses))
+                {
+                    var status = statuses[0];
+
+                    var waMessageId = status.GetProperty("id").GetString();
+                    var deliveryStatus = status.GetProperty("status").GetString();
+
+                    if (!string.IsNullOrWhiteSpace(waMessageId) &&
+                        !string.IsNullOrWhiteSpace(deliveryStatus))
+                    {
+                        await _messageRepo.UpdateStatusAsync(
+                            waMessageId,
+                            deliveryStatus
+                        );
+                    }
+
                     return Ok();
-
-                var status = statuses[0];
-
-                var waMessageId = status.GetProperty("id").GetString();
-                var deliveryStatus = status.GetProperty("status").GetString();
-
-                if (string.IsNullOrWhiteSpace(waMessageId) || string.IsNullOrWhiteSpace(deliveryStatus))
-                    return Ok();
-
-                var update = Builders<WhatsAppResponseLog>.Update
-                    .Set(x => x.DeliveryStatus, deliveryStatus)
-                    .Set(x => x.UpdatedAt, DateTime.UtcNow);
-
-                await _logs.UpdateOneAsync(
-                    x => x.WaMessageId == waMessageId,
-                    update
-                );
+                }
             }
             catch
             {
-                // 🔒 Never crash webhook
+                // 🔒 Webhooks must NEVER crash
             }
 
             return Ok();

@@ -47,6 +47,8 @@ builder.Services.AddScoped<PublishingInvoiceRepository>();
 builder.Services.AddScoped<PublishingInvoicePdfService>();
 builder.Services.AddScoped<EnquiryRepository>();
 builder.Services.AddScoped<MongoLogRepository>();
+builder.Services.AddScoped<ConversationRepository>();
+builder.Services.AddScoped<MessageRepository>();
 
 builder.Services.AddHttpClient<WhatsAppService>();
 builder.Services.AddHttpClient<WhatsAppTemplateService>();

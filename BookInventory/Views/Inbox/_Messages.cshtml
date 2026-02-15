@@ -1,0 +1,19 @@
+﻿@using BookInventory.Models
+@model List<Message>
+
+@foreach (var m in Model)
+{
+    <div class="mb-2 text-@(m.Direction == "OUT" ? "end" : "start")">
+        <div class="d-inline-block p-2 rounded
+                @(m.Direction == "OUT" ? "bg-primary text-white" : "bg-light")">
+            @m.Text
+
+            @if (m.Direction == "OUT")
+            {
+                <div class="small text-muted">
+                    @m.DeliveryStatus
+                </div>
+            }
+        </div>
+    </div>
+}
