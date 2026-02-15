@@ -10,17 +10,23 @@ namespace BookInventory.Controllers
         private readonly MongoLogRepository _mongoLogRepository;
         private readonly WhatsAppService _whatsAppService;
         private readonly EnquiryRepository _repo;
+        private readonly WhatsAppTemplateService _whatsAppTemplateService;
 
-        public WhatsAppController(EnquiryRepository repo, MongoLogRepository mongoLogRepository,WhatsAppService whatsAppService)
+        public WhatsAppController(EnquiryRepository repo, MongoLogRepository mongoLogRepository,WhatsAppService whatsAppService, WhatsAppTemplateService whatsAppTemplateService)
         {
             _mongoLogRepository = mongoLogRepository;
             _whatsAppService = whatsAppService;
             _repo= repo;
+            _whatsAppTemplateService = whatsAppTemplateService;
         }
 
         [HttpGet]
-        public IActionResult Send()
+        public async Task<IActionResult> Send()
         {
+            var templates = await _whatsAppTemplateService.GetTemplatesAsync();
+
+            ViewBag.Templates = templates;
+
             return View();
         }
 

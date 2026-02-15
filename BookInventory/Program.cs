@@ -32,7 +32,6 @@ builder.Services.AddSession(options =>
 builder.Services.AddSingleton<MongoContext>();
 
 builder.Services.AddScoped<ClearEnquiryCacheFilter>();
-
 builder.Services.AddScoped<CounterRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<AuthService>();
@@ -48,7 +47,9 @@ builder.Services.AddScoped<PublishingInvoiceRepository>();
 builder.Services.AddScoped<PublishingInvoicePdfService>();
 builder.Services.AddScoped<EnquiryRepository>();
 builder.Services.AddScoped<MongoLogRepository>();
+
 builder.Services.AddHttpClient<WhatsAppService>();
+builder.Services.AddHttpClient<WhatsAppTemplateService>();
 
 var app = builder.Build();
 

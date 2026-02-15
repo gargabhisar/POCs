@@ -2,17 +2,32 @@
 
 <form method="post">
     <div class="form-group">
-        <label>Template Name</label>
-        <input type="text"
-               name="templateName"
-               class="form-control"
-               placeholder="hello_world"
-               required />
+        <label>Template</label>
+
+        <select id="templateSelect"
+                name="templateName"
+                class="form-control"
+                required>
+            <option value="">-- Select Template --</option>
+
+            @foreach (var t in (List<WhatsAppTemplateDto>)ViewBag.Templates)
+            {
+                var isApproved = t.Status == "APPROVED";
+
+                <option value="@t.Name"
+                        disabled="@(isApproved ? null : "disabled")">
+                    @t.Name (@t.Category, @t.Status)
+                </option>
+            }
+        </select>
     </div>
 
     <br />
 
-    <button class="btn btn-primary" type="submit">
+    <button id="sendBtn"
+            class="btn btn-primary"
+            type="submit"
+            disabled>
         Send Messages
     </button>
 </form>
@@ -30,3 +45,11 @@
         @ViewBag.Error
     </div>
 }
+<script>
+    const templateSelect = document.getElementById("templateSelect");
+    const sendBtn = document.getElementById("sendBtn");
+
+    templateSelect.addEventListener("change", function () {
+        sendBtn.disabled = this.value === "";
+    });
+</script>
