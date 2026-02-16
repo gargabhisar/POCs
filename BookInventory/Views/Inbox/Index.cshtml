@@ -9,7 +9,7 @@
 
     <!-- LEFT: Conversation list -->
     <div class="col-4 border-end overflow-auto">
-        <h5 class="p-2">Inbox</h5>
+        <h5 class="p-3 border-bottom">Inbox</h5>
 
         @if (!conversations.Any())
         {
@@ -25,14 +25,12 @@
             ? c.PhoneNumber
             : c.ContactName;
 
-            <a class="d-block p-2 border-bottom text-decoration-none
-                   @(selected != null && selected.Id == c.Id ? "bg-light" : "")"
+            <a class="d-block p-3 border-bottom text-decoration-none inbox-item
+                   @(selected?.Id == c.Id ? "active-chat" : "")"
                href="/Inbox/Index?conversationId=@c.Id">
 
                 <div class="fw-bold">@displayName</div>
-                <small class="text-muted">
-                    @c.LastMessageText
-                </small>
+                <small class="text-muted">@c.LastMessageText</small>
             </a>
         }
     </div>
@@ -53,19 +51,22 @@
             ? selected.PhoneNumber
             : selected.ContactName;
 
-            <div class="border-bottom p-2">
-                <strong>@headerName</strong><br />
-                <small class="text-muted">@selected.PhoneNumber</small>
+            <!-- Header -->
+            <div class="border-bottom p-3 bg-light">
+                <div class="fw-bold">@headerName</div>
+                <div class="text-muted small">@selected.PhoneNumber</div>
             </div>
 
+            <!-- Messages -->
             <div id="messagesContainer"
-                 class="flex-grow-1 overflow-auto p-3">
+                 class="flex-grow-1 overflow-auto p-3 bg-white">
                 @await Html.PartialAsync("_Messages", messages)
             </div>
 
+            <!-- Reply box -->
             <form method="post"
                   action="/Inbox/SendReply"
-                  class="border-top p-2">
+                  class="border-top p-3 bg-light">
 
                 <input type="hidden"
                        name="conversationId"
@@ -74,11 +75,12 @@
                 <div class="input-group">
                     <input type="text"
                            name="message"
-                           class="form-control"
+                           class="form-control rounded-pill"
                            placeholder="Type a reply..."
                            required />
 
-                    <button class="btn btn-success" type="submit">
+                    <button class="btn btn-success rounded-pill px-4"
+                            type="submit">
                         Send
                     </button>
                 </div>
@@ -97,15 +99,36 @@
                 const res = await fetch(
                     `/Inbox/Messages?conversationId=${conversationId}`
                 );
-
                 if (!res.ok) return;
 
                 const html = await res.text();
-                document.getElementById("messagesContainer").innerHTML = html;
+                const container = document.getElementById("messagesContainer");
+                container.innerHTML = html;
+                container.scrollTop = container.scrollHeight;
             } catch { }
         }
+
+        // Initial scroll
+        setTimeout(() => {
+            const el = document.getElementById("messagesContainer");
+            if (el) el.scrollTop = el.scrollHeight;
+        }, 200);
 
         // Refresh every 5 seconds
         setInterval(refreshMessages, 5000);
     </script>
 }
+
+<style>
+    .inbox-item {
+        color: #000;
+    }
+
+        .inbox-item:hover {
+            background-color: #f1f3f5;
+        }
+
+    .active-chat {
+        background-color: #e7f1ff;
+    }
+</style>

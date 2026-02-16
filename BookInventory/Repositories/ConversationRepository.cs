@@ -22,7 +22,23 @@ namespace BookInventory.Repositories
                     .FirstOrDefaultAsync();
 
             if (conversation != null)
+            {
+                if (string.IsNullOrWhiteSpace(conversation.ContactName) && !string.IsNullOrWhiteSpace(contactName))
+                {
+                    var update = Builders<Conversation>.Update
+                        .Set(x => x.ContactName, contactName)
+                        .Set(x => x.UpdatedAt, DateTime.UtcNow);
+
+                    await _conversations.UpdateOneAsync(
+                        x => x.Id == conversation.Id,
+                        update
+                    );
+
+                    conversation.ContactName = contactName;
+                }
+
                 return conversation;
+            }                
 
             conversation = new Conversation
             {

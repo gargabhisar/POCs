@@ -55,8 +55,7 @@ namespace BookInventory.Controllers
                 var result = await _whatsAppService.SendTemplateAsync(e.Mobile, templateName);
 
                 // 1️⃣ Conversation
-                var conversation =
-                    await _conversationRepo.GetOrCreateAsync($"91{e.Mobile}");
+                var conversation = await _conversationRepo.GetOrCreateAsync($"91{e.Mobile}", e.Name);
 
                 // 2️⃣ Store message
                 await _messageRepo.InsertAsync(new Message
