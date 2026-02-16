@@ -88,11 +88,12 @@
                 {
                     <!-- ✅ Session ACTIVE -->
                     <div class="input-group">
-                        <input type="text"
-                               name="message"
-                               class="form-control rounded-pill"
-                               placeholder="Type a reply..."
-                               required />
+                        <textarea id="replyBox"
+                          name="message"
+                          class="form-control reply-box"
+                          rows="1"
+                          placeholder="Type a reply..."
+                          required></textarea>
 
                         <button class="btn btn-success rounded-pill px-4"
                                 type="submit">
@@ -143,6 +144,28 @@
 
         // Refresh every 5 seconds
         setInterval(refreshMessages, 5000);
+
+        // ===============================
+        // MULTILINE REPLY (CONTROLLED)
+        // ===============================
+        const replyBox = document.getElementById("replyBox");
+
+        if (replyBox) {
+            // Auto-grow height
+            replyBox.addEventListener("input", () => {
+                replyBox.style.height = "auto";
+                replyBox.style.height =
+                    Math.min(replyBox.scrollHeight, 120) + "px";
+            });
+
+            // Ctrl + Enter → Send
+            replyBox.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && e.ctrlKey) {
+                    e.preventDefault();
+                    this.form.submit();
+                }
+            });
+        }
     </script>
 }
 
@@ -157,5 +180,15 @@
 
     .active-chat {
         background-color: #e7f1ff;
+    }
+
+    .reply-box {
+        resize: none;
+        overflow-y: auto;
+        min-height: 40px;
+        max-height: 120px;
+        line-height: 1.4;
+        border-radius: 20px;
+        padding: 10px 14px;
     }
 </style>
