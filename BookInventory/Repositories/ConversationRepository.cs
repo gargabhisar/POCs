@@ -83,5 +83,21 @@ namespace BookInventory.Repositories
                 .Find(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }
+
+        // 🔑 Update session window on inbound user message
+        public async Task UpdateLastInboundAsync(string conversationId, string text)
+        {
+            var update = Builders<Conversation>.Update
+                .Set(x => x.LastMessageText, text)
+                .Set(x => x.LastMessageDirection, "IN")
+                .Set(x => x.LastMessageAt, DateTime.UtcNow)
+                .Set(x => x.LastInboundAt, DateTime.UtcNow) // 🔥 KEY LINE
+                .Set(x => x.UpdatedAt, DateTime.UtcNow);
+
+            await _conversations.UpdateOneAsync(
+                x => x.Id == conversationId,
+                update
+            );
+        }
     }
 }

@@ -92,11 +92,10 @@ namespace BookInventory.Controllers
                         Timestamp = DateTime.UtcNow
                     });
 
-                    // 🔄 Update conversation preview
-                    await _conversationRepo.UpdateLastMessageAsync(
+                    // 🔄 Update conversation + session window (INBOUND)
+                    await _conversationRepo.UpdateLastInboundAsync(
                         conversation.Id,
-                        text,
-                        "IN"
+                        text
                     );
 
                     return Ok();

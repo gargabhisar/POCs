@@ -22,16 +22,29 @@ namespace BookInventory.Controllers
         public async Task<IActionResult> Index(string conversationId = null)
         {
             var conversations = await _conversationRepo.GetAllAsync();
-
             ViewBag.Conversations = conversations;
 
             if (!string.IsNullOrEmpty(conversationId))
             {
-                ViewBag.SelectedConversation =
+                var selectedConversation =
                     await _conversationRepo.GetByIdAsync(conversationId);
+
+                ViewBag.SelectedConversation = selectedConversation;
 
                 ViewBag.Messages =
                     await _messageRepo.GetByConversationAsync(conversationId);
+
+                // 🔑 STEP 1: Detect WhatsApp session
+                bool sessionActive = false;
+
+                if (selectedConversation?.LastInboundAt != null)
+                {
+                    sessionActive =
+                        DateTime.UtcNow - selectedConversation.LastInboundAt.Value
+                        <= TimeSpan.FromHours(24);
+                }
+
+                ViewBag.SessionActive = sessionActive;
             }
 
             return View();

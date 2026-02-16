@@ -13,6 +13,7 @@ namespace BookInventory.Models
         public string LastMessageText { get; set; } // For inbox preview
         public DateTime LastMessageAt { get; set; }
         public string LastMessageDirection { get; set; } // IN / OUT
+        public DateTime? LastInboundAt { get; set; }
         public string Status { get; set; } = "OPEN"; // OPEN / CLOSED (future use)
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
