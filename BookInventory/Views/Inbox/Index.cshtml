@@ -36,7 +36,7 @@
     </div>
 
     <!-- RIGHT: Messages -->
-    <div class="col-8 d-flex flex-column">
+    <div class="col-8 d-flex flex-column" style="height: 100%;">
 
         @if (selected == null)
         {
@@ -71,7 +71,8 @@
 
             <!-- Messages -->
             <div id="messagesContainer"
-                 class="flex-grow-1 overflow-auto p-3 bg-white">
+                 class="flex-grow-1 overflow-auto p-3 bg-white"
+                 style="min-height: 0;">
                 @await Html.PartialAsync("_Messages", messages)
             </div>
 
