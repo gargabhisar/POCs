@@ -118,55 +118,62 @@
     </div>
 </div>
 
+<!-- ===============================
+     Smart auto-scroll + reply behavior
+================================ -->
 @if (selected != null)
 {
     <script>
-        const conversationId = "@selected.Id";
+        (function () {
+            const container = document.getElementById("messagesContainer");
+            const conversationId = "@selected.Id";
 
-        async function refreshMessages() {
-            try {
-                const res = await fetch(
-                    `/Inbox/Messages?conversationId=${conversationId}`
-                );
-                if (!res.ok) return;
+            async function refreshMessages() {
+                try {
+                    const res = await fetch(`/Inbox/Messages?conversationId=${conversationId}`);
+                    if (!res.ok) return;
 
-                const html = await res.text();
-                const container = document.getElementById("messagesContainer");
-                container.innerHTML = html;
-                container.scrollTop = container.scrollHeight;
-            } catch { }
-        }
+                    const html = await res.text();
 
-        // Initial scroll
-        setTimeout(() => {
-            const el = document.getElementById("messagesContainer");
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 200);
+                    // Check if user is near the bottom
+                    const isNearBottom =
+                        container.scrollTop + container.clientHeight
+                        >= container.scrollHeight - 50;
 
-        // Refresh every 5 seconds
-        setInterval(refreshMessages, 5000);
+                    container.innerHTML = html;
 
-        // ===============================
-        // MULTILINE REPLY (CONTROLLED)
-        // ===============================
-        const replyBox = document.getElementById("replyBox");
-
-        if (replyBox) {
-            // Auto-grow height
-            replyBox.addEventListener("input", () => {
-                replyBox.style.height = "auto";
-                replyBox.style.height =
-                    Math.min(replyBox.scrollHeight, 120) + "px";
-            });
-
-            // Ctrl + Enter → Send
-            replyBox.addEventListener("keydown", function (e) {
-                if (e.key === "Enter" && e.ctrlKey) {
-                    e.preventDefault();
-                    this.form.submit();
+                    if (isNearBottom) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                } catch (error) {
+                    console.error("refreshMessages error:", error);
                 }
-            });
-        }
+            }
+
+            // Initial scroll
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 200);
+
+            // Refresh every 5 seconds
+            setInterval(refreshMessages, 5000);
+
+            // Reply box auto-grow + Ctrl+Enter send
+            const replyBox = document.getElementById("replyBox");
+            if (replyBox) {
+                replyBox.addEventListener("input", () => {
+                    replyBox.style.height = "auto";
+                    replyBox.style.height = Math.min(replyBox.scrollHeight, 120) + "px";
+                });
+
+                replyBox.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && e.ctrlKey) {
+                        e.preventDefault();
+                        this.form.submit();
+                    }
+                });
+            }
+        })();
     </script>
 }
 
@@ -194,7 +201,7 @@
     }
 
     .message-bubble {
-        display: inline-block; /* bubble height depends on text */        
+        display: inline-block; /* bubble height depends on text */
         padding: 6px 12px; /* tight padding */
         border-radius: 14px;
         font-size: 14px;
