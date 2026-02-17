@@ -1,0 +1,25 @@
+﻿@model List<BookInventory.Models.Campaign>
+
+<h3>Campaigns</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Template</th>
+            <th>Status</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Name</td>
+                <td>@c.TemplateName</td>
+                <td>@c.Status</td>
+                <td>@c.CreatedAt.ToLocalTime()</td>
+            </tr>
+        }
+    </tbody>
+</table>

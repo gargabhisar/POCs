@@ -61,7 +61,8 @@ namespace BookInventory.Services
             {
                 HttpStatus = (int)response.StatusCode,
                 RawResponse = body,
-                WaMessageId = waMessageId
+                WaMessageId = waMessageId,
+                Status = response.IsSuccessStatusCode ? "sent" : "failed"
             };
         }
 
@@ -105,7 +106,8 @@ namespace BookInventory.Services
             {
                 HttpStatus = (int)response.StatusCode,
                 RawResponse = body,
-                WaMessageId = waMessageId
+                WaMessageId = waMessageId,
+                Status = response.IsSuccessStatusCode ? "sent" : "failed"
             };
         }
     }
@@ -118,5 +120,6 @@ namespace BookInventory.Services
         public int HttpStatus { get; set; }
         public string RawResponse { get; set; }
         public string WaMessageId { get; set; }
+        public string Status { get; set; } // sent | failed
     }
 }
