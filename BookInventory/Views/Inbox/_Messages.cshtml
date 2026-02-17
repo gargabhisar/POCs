@@ -27,9 +27,8 @@
         <div style="max-width:70%;">
 
             <!-- Message bubble -->
-            <div class="p-2 rounded-3 shadow-sm
-                     @(isOut ? "bg-primary text-white" : "bg-light text-dark")">
-                @m.Text
+            <div class="message-bubble @(isOut ? "out" : "in")">
+                @Html.Raw(System.Net.WebUtility.HtmlEncode(m.Text.Trim()).Replace("\n", "<br />"))
             </div>
 
             <!-- Status (OUT only) -->

@@ -36,7 +36,7 @@
     </div>
 
     <!-- RIGHT: Messages -->
-    <div class="col-8 d-flex flex-column">
+    <div class="col-8 d-flex flex-column" style="height: 100%;">
 
         @if (selected == null)
         {
@@ -71,7 +71,8 @@
 
             <!-- Messages -->
             <div id="messagesContainer"
-                 class="flex-grow-1 overflow-auto p-3 bg-white">
+                 class="flex-grow-1 overflow-auto p-3 bg-white"
+                 style="min-height: 0;">
                 @await Html.PartialAsync("_Messages", messages)
             </div>
 
@@ -88,11 +89,12 @@
                 {
                     <!-- ✅ Session ACTIVE -->
                     <div class="input-group">
-                        <input type="text"
-                               name="message"
-                               class="form-control rounded-pill"
-                               placeholder="Type a reply..."
-                               required />
+                        <textarea id="replyBox"
+                          name="message"
+                          class="form-control reply-box"
+                          rows="1"
+                          placeholder="Type a reply..."
+                          required></textarea>
 
                         <button class="btn btn-success rounded-pill px-4"
                                 type="submit">
@@ -116,33 +118,62 @@
     </div>
 </div>
 
+<!-- ===============================
+     Smart auto-scroll + reply behavior
+================================ -->
 @if (selected != null)
 {
     <script>
-        const conversationId = "@selected.Id";
+        (function () {
+            const container = document.getElementById("messagesContainer");
+            const conversationId = "@selected.Id";
 
-        async function refreshMessages() {
-            try {
-                const res = await fetch(
-                    `/Inbox/Messages?conversationId=${conversationId}`
-                );
-                if (!res.ok) return;
+            async function refreshMessages() {
+                try {
+                    const res = await fetch(`/Inbox/Messages?conversationId=${conversationId}`);
+                    if (!res.ok) return;
 
-                const html = await res.text();
-                const container = document.getElementById("messagesContainer");
-                container.innerHTML = html;
+                    const html = await res.text();
+
+                    // Check if user is near the bottom
+                    const isNearBottom =
+                        container.scrollTop + container.clientHeight
+                        >= container.scrollHeight - 50;
+
+                    container.innerHTML = html;
+
+                    if (isNearBottom) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                } catch (error) {
+                    console.error("refreshMessages error:", error);
+                }
+            }
+
+            // Initial scroll
+            setTimeout(() => {
                 container.scrollTop = container.scrollHeight;
-            } catch { }
-        }
+            }, 200);
 
-        // Initial scroll
-        setTimeout(() => {
-            const el = document.getElementById("messagesContainer");
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 200);
+            // Refresh every 5 seconds
+            setInterval(refreshMessages, 5000);
 
-        // Refresh every 5 seconds
-        setInterval(refreshMessages, 5000);
+            // Reply box auto-grow + Ctrl+Enter send
+            const replyBox = document.getElementById("replyBox");
+            if (replyBox) {
+                replyBox.addEventListener("input", () => {
+                    replyBox.style.height = "auto";
+                    replyBox.style.height = Math.min(replyBox.scrollHeight, 120) + "px";
+                });
+
+                replyBox.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && e.ctrlKey) {
+                        e.preventDefault();
+                        this.form.submit();
+                    }
+                });
+            }
+        })();
     </script>
 }
 
@@ -151,11 +182,42 @@
         color: #000;
     }
 
-        .inbox-item:hover {
-            background-color: #f1f3f5;
-        }
+    .inbox-item:hover {
+        background-color: #f1f3f5;
+    }
 
     .active-chat {
         background-color: #e7f1ff;
+    }
+
+    .reply-box {
+        resize: none;
+        overflow-y: auto;
+        min-height: 40px;
+        max-height: 120px;
+        line-height: 1.4;
+        border-radius: 20px;
+        padding: 10px 14px;
+    }
+
+    .message-bubble {
+        display: inline-block; /* bubble height depends on text */
+        padding: 6px 12px; /* tight padding */
+        border-radius: 14px;
+        font-size: 14px;
+        line-height: 1.5;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        white-space: normal; /* normal because we insert <br> instead */
+    }
+
+    .message-bubble.out {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    .message-bubble.in {
+        background-color: #f1f3f5;
+        color: #000;
     }
 </style>
