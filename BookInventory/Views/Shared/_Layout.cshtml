@@ -137,20 +137,39 @@
                                     </ul>
                                 </li>
 
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                       asp-controller="WhatsApp"
-                                       asp-action="Send">
-                                        Send WhatsApp
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-dark dropdown-toggle"
+                                       href="#"
+                                       role="button"
+                                       data-bs-toggle="dropdown">
+                                        Whatsapp API
                                     </a>
-                                </li>
 
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                       asp-controller="Inbox"
-                                       asp-action="Index">
-                                        📥 Inbox
-                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="WhatsApp"
+                                               asp-action="Send">
+                                                Send WhatsApp
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Inbox"
+                                               asp-action="List">
+                                                Inbox
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Campaigns"
+                                               asp-action="Create">
+                                                Create Campaigns
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             }
 

@@ -1,49 +1,94 @@
-﻿@{
-    var enquiries = ViewBag.Enquiries as List<Enquiry>;
+﻿@using BookInventory.Models
+@{
+    var enquiries = ViewBag.Enquiries as List<Enquiry> ?? new();
+    var templates = ViewBag.Templates as List<WhatsAppTemplateDto> ?? new();
 }
 
 <h3>Create Campaign</h3>
 
 <form method="post">
+
+    <!-- Campaign name -->
     <div class="mb-3">
         <label class="form-label">Campaign Name</label>
-        <input name="campaignName"
+        <input id="campaignName"
+               name="campaignName"
                class="form-control"
-               placeholder="Diwali Offer"
+               placeholder="Diwali Offer 2026"
                required />
     </div>
 
+    <!-- Template -->
     <div class="mb-3">
-        <label class="form-label">Template Name</label>
-        <input name="templateName"
-               class="form-control"
-               placeholder="hello_world"
-               required />
-    </div>
+        <label class="form-label">Template</label>
 
-    <div class="mb-3">
-        <label class="form-label">Recipients</label>
+        <select id="templateSelect"
+                name="templateName"
+                class="form-control"
+                required>
+            <option value="">-- Select Template --</option>
 
-        <div style="max-height:300px; overflow:auto" class="border p-2">
-            @foreach (var e in enquiries)
+            @foreach (var t in templates)
             {
-                if (!string.IsNullOrWhiteSpace(e.Mobile))
-                {
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="selectedNumbers"
-                               value="@e.Mobile" />
-                        <label class="form-check-label">
-                            @e.Name (@e.Mobile)
-                        </label>
-                    </div>
-                }
+                var isApproved = t.Status == "APPROVED";
+
+                <option value="@t.Name"
+                        disabled="@(isApproved ? null : "disabled")">
+                    @t.Name (@t.Category, @t.Status)
+                </option>
             }
+        </select>
+    </div>
+
+    <!-- Recipients -->
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+        <label class="form-label mb-0">Recipients</label>
+
+        <div class="btn-group btn-group-sm">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="selectAllBtn">
+                Select All
+            </button>
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="clearAllBtn">
+                Clear All
+            </button>
         </div>
     </div>
 
-    <button class="btn btn-primary">
+    <div class="border rounded p-2 mb-3"
+         style="max-height:300px; overflow:auto">
+
+        @foreach (var e in enquiries)
+        {
+            if (!string.IsNullOrWhiteSpace(e.Mobile))
+            {
+                <div class="form-check">
+                    <input class="form-check-input recipient-checkbox"
+                           type="checkbox"
+                           name="selectedNumbers"
+                           value="@e.Mobile" />
+                    <label class="form-check-label">
+                        @e.Name (@e.Mobile)
+                    </label>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Preview -->
+    <div class="alert alert-light border">
+        <strong>Preview</strong><br />
+        Template: <span id="previewTemplate">—</span><br />
+        Recipients: <span id="previewCount">0</span>
+    </div>
+
+    <button id="sendBtn"
+            class="btn btn-primary"
+            type="submit"
+            disabled>
         Send Campaign
     </button>
 
@@ -54,3 +99,62 @@
         </div>
     }
 </form>
+
+<script>
+    const campaignNameInput = document.getElementById("campaignName");
+    const templateSelect = document.getElementById("templateSelect");
+    const previewTemplate = document.getElementById("previewTemplate");
+    const previewCount = document.getElementById("previewCount");
+    const sendBtn = document.getElementById("sendBtn");
+
+    const selectAllBtn = document.getElementById("selectAllBtn");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+
+    function getCheckedCount() {
+        return document.querySelectorAll(".recipient-checkbox:checked").length;
+    }
+
+    function updatePreview() {
+        const selectedOption = templateSelect.selectedOptions[0];
+
+        previewTemplate.textContent =
+            selectedOption && selectedOption.value
+                ? selectedOption.text
+                : "—";
+
+        previewCount.textContent = getCheckedCount();
+
+        updateSendButtonState();
+    }
+
+    function updateSendButtonState() {
+        const hasName = campaignNameInput.value.trim().length > 0;
+        const hasTemplate = templateSelect.value !== "";
+        const hasRecipients = getCheckedCount() > 0;
+
+        sendBtn.disabled = !(hasName && hasTemplate && hasRecipients);
+    }
+
+    // Events
+    campaignNameInput.addEventListener("input", updateSendButtonState);
+    templateSelect.addEventListener("change", updatePreview);
+
+    document.addEventListener("change", function (e) {
+        if (e.target.classList.contains("recipient-checkbox")) {
+            updatePreview();
+        }
+    });
+
+    // Select All / Clear All
+    selectAllBtn.addEventListener("click", function () {
+        document.querySelectorAll(".recipient-checkbox")
+            .forEach(cb => cb.checked = true);
+        updatePreview();
+    });
+
+    clearAllBtn.addEventListener("click", function () {
+        document.querySelectorAll(".recipient-checkbox")
+            .forEach(cb => cb.checked = false);
+        updatePreview();
+    });
+</script>

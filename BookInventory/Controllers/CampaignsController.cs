@@ -10,22 +10,26 @@ namespace BookInventory.Controllers
         private readonly CampaignRecipientRepository _recipientRepo;
         private readonly EnquiryRepository _enquiryRepo;
         private readonly WhatsAppService _whatsAppService;
+        private readonly WhatsAppTemplateService _whatsAppTemplateService;
 
         public CampaignsController(
             CampaignRepository campaignRepo,
             CampaignRecipientRepository recipientRepo,
             EnquiryRepository enquiryRepo,
-            WhatsAppService whatsAppService)
+            WhatsAppService whatsAppService,
+            WhatsAppTemplateService whatsAppTemplateService)
         {
             _campaignRepo = campaignRepo;
             _recipientRepo = recipientRepo;
             _enquiryRepo = enquiryRepo;
             _whatsAppService = whatsAppService;
+            _whatsAppTemplateService = whatsAppTemplateService;
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.Templates = await _whatsAppTemplateService.GetTemplatesAsync();
             ViewBag.Enquiries = _enquiryRepo.GetAll();
             return View();
         }
