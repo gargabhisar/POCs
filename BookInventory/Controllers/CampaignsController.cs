@@ -46,6 +46,7 @@ namespace BookInventory.Controllers
             {
                 ViewBag.Error = "All fields are required";
                 ViewBag.Enquiries = _enquiryRepo.GetAll();
+                ViewBag.Templates = await _whatsAppTemplateService.GetTemplatesAsync();
                 return View();
             }
 
